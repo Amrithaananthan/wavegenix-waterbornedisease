@@ -1,0 +1,24 @@
+{
+  "name": "aquaguard-backend",
+  "version": "1.0.0",
+  "description": "Backend for AquaGuard - Smart Community Health Monitoring System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "mqtt": "^4.3.8",
+    "socket.io": "^4.8.1"
+  },
+  "keywords": [
+    "iot",
+    "health",
+    "water",
+    "monitoring"
+  ],
+  "author": "Team Innovation",
+  "license": "MIT"
+}

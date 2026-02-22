@@ -1,0 +1,362 @@
+[
+  {
+    "deviceId": "device_5",
+    "pH": 6.25,
+    "turbidity": 21.58,
+    "tds": 718,
+    "temperature": 33.48,
+    "location": {
+      "lat": 12.976282593606054,
+      "lng": 77.58745445565931
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:38:13.834Z",
+    "_id": "1758119893834",
+    "message": "Water quality issues detected: pH, turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 8.6,
+    "turbidity": 12.75,
+    "tds": 759,
+    "temperature": 33.94,
+    "location": {
+      "lat": 9.501173785265934,
+      "lng": 76.34208564614565
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:38:10.830Z",
+    "_id": "1758119890831",
+    "message": "Water quality issues detected: pH, turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 7.97,
+    "turbidity": 16.56,
+    "tds": 859,
+    "temperature": 25.34,
+    "location": {
+      "lat": 9.490967698865996,
+      "lng": 76.33587385097742
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:38:07.824Z",
+    "_id": "1758119887824",
+    "message": "Water quality issues detected: turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 6.49,
+    "turbidity": 32.69,
+    "tds": 776,
+    "temperature": 27.33,
+    "location": {
+      "lat": 28.604554798302168,
+      "lng": 77.20369430991897
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:38:04.810Z",
+    "_id": "1758119884810",
+    "message": "Water quality issues detected: pH, turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 6.04,
+    "turbidity": 20.49,
+    "tds": 886,
+    "temperature": 21.07,
+    "location": {
+      "lat": 28.60884265122533,
+      "lng": 77.21238508015823
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:38:01.801Z",
+    "_id": "1758119881801",
+    "message": "Water quality issues detected: pH, turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 6.73,
+    "turbidity": 36.82,
+    "tds": 431,
+    "temperature": 27.45,
+    "location": {
+      "lat": 25.417674914398876,
+      "lng": 81.8791482099891
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:58.792Z",
+    "_id": "1758119878792",
+    "message": "Water quality issues detected: turbidity",
+    "severity": "medium"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 8.94,
+    "turbidity": 12.25,
+    "tds": 818,
+    "temperature": 33.98,
+    "location": {
+      "lat": 12.963967957188428,
+      "lng": 77.58522772744156
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:37:55.780Z",
+    "_id": "1758119875780",
+    "message": "Water quality issues detected: pH, turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 8.29,
+    "turbidity": 28.45,
+    "tds": 468,
+    "temperature": 31.89,
+    "location": {
+      "lat": 9.497957222358009,
+      "lng": 76.34550039029048
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:37:52.767Z",
+    "_id": "1758119872767",
+    "message": "Water quality issues detected: turbidity",
+    "severity": "medium"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 7.25,
+    "turbidity": 17.41,
+    "tds": 898,
+    "temperature": 20.03,
+    "location": {
+      "lat": 25.42797936028191,
+      "lng": 81.88914325422547
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:49.763Z",
+    "_id": "1758119869763",
+    "message": "Water quality issues detected: turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 7.64,
+    "turbidity": 38.59,
+    "tds": 611,
+    "temperature": 23.53,
+    "location": {
+      "lat": 12.967811168011831,
+      "lng": 77.6022630486719
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:37:46.751Z",
+    "_id": "1758119866751",
+    "message": "Water quality issues detected: turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 7.75,
+    "turbidity": 11.27,
+    "tds": 777,
+    "temperature": 27.66,
+    "location": {
+      "lat": 28.617405841448623,
+      "lng": 77.21881734473061
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:37:43.742Z",
+    "_id": "1758119863742",
+    "message": "Water quality issues detected: turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 6.95,
+    "turbidity": 26.85,
+    "tds": 411,
+    "temperature": 24.33,
+    "location": {
+      "lat": 25.312686645941074,
+      "lng": 83.00181572109001
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:40.742Z",
+    "_id": "1758119860742",
+    "message": "Water quality issues detected: turbidity",
+    "severity": "medium"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 6.34,
+    "turbidity": 18.36,
+    "tds": 596,
+    "temperature": 22.67,
+    "location": {
+      "lat": 12.980440482419004,
+      "lng": 77.59029996256663
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:37:37.726Z",
+    "_id": "1758119857726",
+    "message": "Water quality issues detected: pH, turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 8.85,
+    "turbidity": 32.78,
+    "tds": 942,
+    "temperature": 25.69,
+    "location": {
+      "lat": 12.96906182925836,
+      "lng": 77.59490805764233
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:37:34.724Z",
+    "_id": "1758119854724",
+    "message": "Water quality issues detected: pH, turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_4",
+    "pH": 8.99,
+    "turbidity": 37.58,
+    "tds": 409,
+    "temperature": 27.51,
+    "location": {
+      "lat": 13.090166999798065,
+      "lng": 80.27572154975906
+    },
+    "source": "Chennai Water Supply",
+    "region": "Tamil Nadu",
+    "type": "reservoir",
+    "timestamp": "2025-09-17T14:37:31.722Z",
+    "_id": "1758119851722",
+    "message": "Water quality issues detected: pH, turbidity",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 6.91,
+    "turbidity": 35.33,
+    "tds": 996,
+    "temperature": 23.19,
+    "location": {
+      "lat": 19.06877720717742,
+      "lng": 72.87751402494304
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:37:28.710Z",
+    "_id": "1758119848710",
+    "message": "Water quality issues detected: turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 6.53,
+    "turbidity": 24.92,
+    "tds": 784,
+    "temperature": 23.21,
+    "location": {
+      "lat": 25.317632085556124,
+      "lng": 83.00241968454765
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:25.707Z",
+    "_id": "1758119845707",
+    "message": "Water quality issues detected: turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 6.16,
+    "turbidity": 14.09,
+    "tds": 502,
+    "temperature": 20.17,
+    "location": {
+      "lat": 19.085719774599315,
+      "lng": 72.88325626446066
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:37:22.695Z",
+    "_id": "1758119842695",
+    "message": "Water quality issues detected: pH, turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 7.86,
+    "turbidity": 19.4,
+    "tds": 730,
+    "temperature": 21.56,
+    "location": {
+      "lat": 25.420428974437165,
+      "lng": 81.88350738548671
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:19.683Z",
+    "_id": "1758119839683",
+    "message": "Water quality issues detected: turbidity, tds",
+    "severity": "high"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 8.65,
+    "turbidity": 24.02,
+    "tds": 932,
+    "temperature": 27.88,
+    "location": {
+      "lat": 19.069639014847155,
+      "lng": 72.86774900135792
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:37:16.678Z",
+    "_id": "1758119836678",
+    "message": "Water quality issues detected: pH, turbidity, tds",
+    "severity": "high"
+  }
+]

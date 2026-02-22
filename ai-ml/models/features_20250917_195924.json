@@ -1,0 +1,6 @@
+{
+    "features": ["ph", "Hardness", "Solids", "Chloramines", "Sulfate", "Conductivity", "Organic_carbon", "Trihalomethanes", "Turbidity"],
+    "model_name": "random_forest", 
+    "accuracy": 0.678,
+    "timestamp": "20250923_194939"
+}

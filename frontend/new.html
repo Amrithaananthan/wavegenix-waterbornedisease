@@ -1,0 +1,3901 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveGenix - Water Quality Monitoring Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #10b981;
+            --accent-danger: #ef4444;
+            --accent-warning: #f59e0b;
+            --accent-info: #8b5cf6;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-primary);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-secondary);
+            color: var(--accent-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 20px;
+        }
+
+        .top-bar {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s, box-shadow 0.3s;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .language-selector, .theme-toggle {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .language-selector:hover, .theme-toggle:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-card.critical {
+            border-left: 4px solid var(--accent-danger);
+            animation: pulse 2s infinite;
+        }
+
+        .stat-card.warning {
+            border-left: 4px solid var(--accent-warning);
+        }
+
+        .stat-card.good {
+            border-left: 4px solid var(--accent-secondary);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .stat-unit {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .stat-trend {
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .trend-up {
+            color: var(--accent-danger);
+        }
+
+        .trend-down {
+            color: var(--accent-secondary);
+        }
+
+        .trend-stable {
+            color: var(--accent-warning);
+        }
+
+        .ml-prediction {
+            margin-top: 10px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .prediction-safe {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--accent-secondary);
+            border: 1px solid var(--accent-secondary);
+        }
+
+        .prediction-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--accent-warning);
+            border: 1px solid var(--accent-warning);
+        }
+
+        .prediction-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--accent-danger);
+            border: 1px solid var(--accent-danger);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        #mapContainer {
+            height: 500px;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .map-controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent-primary);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--accent-secondary);
+        }
+
+        .btn-danger {
+            background: var(--accent-danger);
+        }
+
+        .btn-warning {
+            background: var(--accent-warning);
+        }
+
+        .btn-info {
+            background: var(--accent-info);
+        }
+
+        .alerts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .alert-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-danger);
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .alert-card:hover {
+            transform: translateX(5px);
+        }
+
+        .alert-card.warning {
+            border-left-color: var(--accent-warning);
+        }
+
+        .alert-card.info {
+            border-left-color: var(--accent-primary);
+        }
+
+        .alert-card.critical {
+            border-left-color: var(--accent-danger);
+            animation: criticalPulse 2s infinite;
+        }
+
+        @keyframes criticalPulse {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        .quiz-container {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .quiz-question {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(5px);
+        }
+
+        .quiz-option.correct {
+            background: #10b98144;
+            border-color: var(--accent-secondary);
+        }
+
+        .quiz-option.incorrect {
+            background: #ef444444;
+            border-color: var(--accent-danger);
+        }
+
+        .quiz-explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-warning);
+            display: none;
+        }
+
+        .quiz-explanation.show {
+            display: block;
+        }
+
+        .quiz-score {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+            color: var(--accent-primary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-primary);
+            transition: width 0.3s;
+        }
+
+        .education-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .education-tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .education-tab.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .education-content {
+            display: none;
+        }
+
+        .education-content.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .resource-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .resource-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .resource-content {
+            padding: 20px;
+        }
+
+        .resource-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .resource-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-modal.active {
+            display: flex;
+        }
+
+        .video-modal-content {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 90%;
+        }
+
+        .video-modal-close {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .video-frame {
+            width: 100%;
+            height: 500px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .health-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .health-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .health-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .health-icon {
+            width: 60px;
+            height: 60px;
+            background-color: var(--accent-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .health-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .health-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .health-tips {
+            list-style: none;
+            padding: 0;
+        }
+
+        .health-tips li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .health-tips li:last-child {
+            border-bottom: none;
+        }
+
+        .health-tips li::before {
+            content: '✓';
+            color: var(--accent-secondary);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .village-heads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .village-head-card {
+            background-color: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .village-head-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .village-head-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--accent-primary);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+        }
+
+        .water-body-info {
+            background-image: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .water-body-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .water-body-card {
+            background-image: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* Reports & Complaints Section Styles */
+        .reports-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .report-form-container, .complaints-list-container {
+            background-color: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .form-submit:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .complaints-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .complaints-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .complaint-card {
+            background-color: var(--bg-secondary);
+            padding: 18px;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-warning);
+            transition: all 0.3s;
+        }
+
+        .complaint-card:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .complaint-card.resolved {
+            border-left-color: var(--accent-secondary);
+            opacity: 0.8;
+        }
+
+        .complaint-card.critical {
+            border-left-color: var(--accent-danger);
+        }
+
+        .complaint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .complaint-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .complaint-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .complaint-description {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .complaint-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-in-progress {
+            background-color: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-resolved {
+            background-color: #d1fae5;
+            color: #059669;
+        }
+
+        .complaint-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .resolve-btn {
+            background-color: var(--accent-secondary);
+            color: white;
+        }
+
+        .delete-btn {
+            background-color: var(--accent-danger);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        /* Emergency Alert Banner */
+        .emergency-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 2000;
+            animation: emergencyPulse 2s infinite;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        @keyframes emergencyPulse {
+            0% { background: linear-gradient(90deg, #ef4444, #dc2626); }
+            50% { background: linear-gradient(90deg, #dc2626, #b91c1c); }
+            100% { background: linear-gradient(90deg, #ef4444, #dc2626); }
+        }
+
+        .emergency-banner-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .emergency-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0 10px;
+        }
+
+        /* Blockchain Status */
+        .blockchain-status {
+            background-color: var(--bg-card);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .blockchain-info {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .blockchain-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .blockchain-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--accent-primary);
+        }
+
+        .blockchain-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* QR Generator Styles */
+        .qr-generator-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+        }
+
+        .water-quality-info {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .quality-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .quality-good {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .quality-moderate {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .quality-poor {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .qr-code {
+            margin: 20px auto;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 2px solid var(--border-color);
+            min-height: 250px;
+            min-width: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .status-item {
+            text-align: left;
+            padding: 10px;
+            background: var(--bg-card);
+            border-radius: 8px;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .status-value {
+            color: var(--text-primary);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .error-message {
+            color: #dc2626;
+            background: #fef2f2;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .success-message {
+            color: #065f46;
+            background: #d1fae5;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        #qrCanvas {
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .qr-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .qr-simulation {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .simulation-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        /* Social Sharing */
+        .social-sharing {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .social-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .facebook-btn {
+            background: #3b5998;
+        }
+
+        .twitter-btn {
+            background: #1da1f2;
+        }
+
+        .whatsapp-btn {
+            background: #25d366;
+        }
+
+        /* Voice Alert */
+        .voice-alert {
+            background: var(--accent-warning);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: pulse 2s infinite;
+        }
+
+        /* Alert Voice Notification */
+        .alert-voice-notification {
+            background: var(--accent-primary);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .alert-voice-notification i {
+            font-size: 24px;
+        }
+
+        /* Parameter Quality Indicators */
+        .parameter-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 12px;
+            margin-left: 8px;
+        }
+
+        .status-excellent {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-good {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-fair {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-poor {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-critical {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 1024px) {
+            .reports-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .complaint-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .emergency-banner-content {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .blockchain-info {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .qr-actions, .simulation-buttons, .social-sharing {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .status-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Emergency Alert Banner -->
+    <div class="emergency-banner" id="emergencyBanner" style="display: none;">
+        <div class="emergency-banner-content">
+            <span id="emergencyMessage">🚨 EMERGENCY: Unsafe water detected! Take immediate action!</span>
+            <button class="emergency-close" onclick="closeEmergencyBanner()">✕</button>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="logo">
+                <span>💧</span>
+                <span data-translate="appName">WaveGenix</span>
+            </div>
+            <div class="nav-item active" onclick="showSection('dashboard')" data-translate="navDashboard">
+                <i class="fas fa-chart-bar"></i> Dashboard
+            </div>
+            <div class="nav-item" onclick="showSection('mapSection')" data-translate="navMap">
+                <i class="fas fa-map"></i> Village Map
+            </div>
+            <div class="nav-item" onclick="showSection('analytics')" data-translate="navAnalytics">
+                <i class="fas fa-chart-line"></i> Analytics
+            </div>
+            <div class="nav-item" onclick="showSection('alerts')" data-translate="navAlerts">
+                <i class="fas fa-bell"></i> Alerts
+            </div>
+            <div class="nav-item" onclick="showSection('qrGenerator')" data-translate="navQRGenerator">
+                <i class="fas fa-qrcode"></i> QR Generator
+            </div>
+            <div class="nav-item" onclick="showSection('game')" data-translate="navGame">
+                <i class="fas fa-gamepad"></i> pH Learning Game
+            </div>
+            <div class="nav-item" onclick="showSection('villageHeads')" data-translate="navVillageHeads">
+                <i class="fas fa-users"></i> Village Heads
+            </div>
+            <div class="nav-item" onclick="showSection('education')" data-translate="navEducation">
+                <i class="fas fa-book"></i> Education Hub
+            </div>
+            <div class="nav-item" onclick="showSection('health')" data-translate="navHealth">
+                <i class="fas fa-heartbeat"></i> Health Resources
+            </div>
+            <div class="nav-item" onclick="showSection('reports')" data-translate="navReports">
+                <i class="fas fa-file-alt"></i> Reports & Complaints
+            </div>
+            <div class="nav-item" onclick="showSection('settings')" data-translate="navSettings">
+                <i class="fas fa-cog"></i> Settings
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <h1 data-translate="welcome">Welcome to WaveGenix</h1>
+                <div class="controls">
+                    <select class="language-selector" onchange="changeLanguage(this.value)">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी</option>
+                        <option value="ta">தமிழ்</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="ml">മലയാളം</option>
+                    </select>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <span id="themeIcon">🌙</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active">
+                <div class="stats-grid" id="dashboardStats">
+                    <!-- Stats will be dynamically updated with real data -->
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="dashboardChart"></canvas>
+                </div>
+
+                <!-- ML Predictions Display -->
+                <div class="chart-container" id="mlPredictionsContainer">
+                    <h3>🤖 AI Water Safety Analysis</h3>
+                    <div id="mlPredictionsContent">
+                        <div class="loading">Loading AI predictions...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Village Map Section -->
+            <div id="mapSection" class="content-section">
+                <div class="map-controls">
+                    <button class="btn" onclick="getMyLocation()" data-translate="getLocation">
+                        <i class="fas fa-location-arrow"></i> Get My Location
+                    </button>
+                    <button class="btn btn-secondary" onclick="findWaterBodies()" data-translate="findWaterBodies">
+                        <i class="fas fa-water"></i> Find Water Bodies
+                    </button>
+                    <button class="btn btn-warning" onclick="clearWaterBodies()" data-translate="clearWaterBodies">
+                        <i class="fas fa-trash"></i> Clear Water Bodies
+                    </button>
+                </div>
+                <div id="mapContainer"></div>
+                
+                <div class="water-body-info" id="waterBodyInfo" style="display: none;">
+                    <h3 data-translate="nearbyWaterBodies">Nearby Water Bodies</h3>
+                    <div class="water-body-grid" id="waterBodyGrid"></div>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics" class="content-section">
+                <div class="chart-container">
+                    <h3 data-translate="weeklyTrend">Weekly Water Quality Trend</h3>
+                    <canvas id="analyticsChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 data-translate="villageComparison">Village Comparison</h3>
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Alerts Section -->
+            <div id="alerts" class="content-section">
+                <!-- Voice Alert Notification -->
+                <div class="alert-voice-notification" id="alertVoiceNotification" style="display: none;">
+                    <i class="fas fa-volume-up"></i>
+                    <span id="alertVoiceMessage">Alerts are available for review</span>
+                </div>
+                
+                <div class="blockchain-status" id="blockchainStatus">
+                    <h3>🔗 Blockchain Status</h3>
+                    <div class="blockchain-info" id="blockchainInfo">
+                        <div class="loading">Loading blockchain data...</div>
+                    </div>
+                </div>
+                <div class="alerts-container" id="alertsContainer">
+                    <!-- Alerts will be dynamically loaded -->
+                </div>
+            </div>
+
+            <!-- QR Generator Section -->
+            <div id="qrGenerator" class="content-section">
+                <div class="qr-generator-container">
+                    <h1>🌊 Water Quality QR Code</h1>
+                    <p>Scan this QR code to view current water quality information</p>
+                    
+                    <div class="water-quality-info">
+                        <h3>Current Water Status</h3>
+                        <div id="qualityIndicator" class="quality-indicator quality-good">Loading...</div>
+                        
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <div class="status-label">pH Level</div>
+                                <div class="status-value" id="phValue">Loading...</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-label">TDS Level</div>
+                                <div class="status-value" id="tdsValue">Loading...</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-label">Temperature</div>
+                                <div class="status-value" id="tempValue">Loading...</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-label">Turbidity</div>
+                                <div class="status-value" id="turbidityValue">Loading...</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-label">Dissolved Oxygen</div>
+                                <div class="status-value" id="doValue">Loading...</div>
+                            </div>
+                            <div class="status-item">
+                                <div class="status-label">Overall Quality</div>
+                                <div class="status-value" id="overallQuality">Loading...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="qr-code" id="qrCode">
+                        <canvas id="qrCanvas" width="200" height="200"></canvas>
+                        <div id="loadingText" style="display: none;" class="success-message">Generating QR Code...</div>
+                    </div>
+                    
+                    <div class="qr-actions">
+                        <button class="btn" onclick="generateQRCode()">
+                            <i class="fas fa-sync-alt"></i> Generate QR Code
+                        </button>
+                        <button class="btn btn-secondary" onclick="downloadQRCode()">
+                            <i class="fas fa-download"></i> Download QR
+                        </button>
+                        <button class="btn btn-info" onclick="refreshWaterQualityData()">
+                            <i class="fas fa-refresh"></i> Refresh Data
+                        </button>
+                    </div>
+
+                    <!-- Social Sharing Buttons -->
+                    <div class="social-sharing">
+                        <button class="social-btn facebook-btn" onclick="shareOnSocial('facebook')">
+                            <i class="fab fa-facebook-f"></i> Share on Facebook
+                        </button>
+                        <button class="social-btn twitter-btn" onclick="shareOnSocial('twitter')">
+                            <i class="fab fa-twitter"></i> Share on Twitter
+                        </button>
+                        <button class="social-btn whatsapp-btn" onclick="shareOnSocial('whatsapp')">
+                            <i class="fab fa-whatsapp"></i> Share on WhatsApp
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 20px; padding: 15px; background: #f0f9ff; border-radius: 8px;">
+                        <h4>💡 How to Use:</h4>
+                        <p>1. Click "Generate QR Code"<br>
+                           2. Scan QR with phone camera<br>
+                           3. View water quality data<br>
+                           4. Share with community members</p>
+                    </div>
+
+                    <!-- Test buttons -->
+                    <div class="qr-simulation">
+                        <h4>🧪 Test Different Water Conditions</h4>
+                        <div class="simulation-buttons">
+                            <button class="btn" style="background: #10b981;" onclick="simulateWaterCondition('good')">
+                                <i class="fas fa-check-circle"></i> Good Water
+                            </button>
+                            <button class="btn" style="background: #f59e0b;" onclick="simulateWaterCondition('moderate')">
+                                <i class="fas fa-exclamation-triangle"></i> Moderate Water
+                            </button>
+                            <button class="btn" style="background: #ef4444;" onclick="simulateWaterCondition('poor')">
+                                <i class="fas fa-times-circle"></i> Poor Water
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- pH Learning Game Section -->
+            <div id="game" class="content-section">
+                <div class="quiz-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="quiz-score" id="quizScore">Score: 0 / 0</div>
+                    <div class="quiz-question" id="quizQuestion"></div>
+                    <div class="quiz-options" id="quizOptions"></div>
+                    <div class="quiz-explanation" id="quizExplanation"></div>
+                    <button class="btn" id="nextBtn" onclick="nextQuestion()" style="margin-top: 20px; display: none;" data-translate="nextQuestion">Next Question</button>
+                    <button class="btn btn-secondary" id="restartBtn" onclick="restartQuiz()" style="margin-top: 20px; display: none;" data-translate="restartQuiz">Restart Quiz</button>
+                </div>
+            </div>
+
+            <!-- Village Heads Section -->
+            <div id="villageHeads" class="content-section">
+                <div class="village-heads-grid" id="villageHeadsGrid"></div>
+            </div>
+
+            <!-- Education Hub Section -->
+            <div id="education" class="content-section">
+                <div class="education-tabs">
+                    <div class="education-tab active" onclick="showEducationTab('videos')" data-translate="awarenessVideos">
+                        <i class="fas fa-video"></i> Awareness Videos
+                    </div>
+                    <div class="education-tab" onclick="showEducationTab('infographics')" data-translate="infographics">
+                        <i class="fas fa-chart-bar"></i> Infographics
+                    </div>
+                    <div class="education-tab" onclick="showEducationTab('resources')" data-translate="learningResources">
+                        <i class="fas fa-book"></i> Learning Resources
+                    </div>
+                    <div class="education-tab" onclick="showEducationTab('updates')" data-translate="latestUpdates">
+                        <i class="fas fa-newspaper"></i> Latest Updates
+                    </div>
+                </div>
+
+                <div id="videos" class="education-content active"></div>
+                <div id="infographics" class="education-content"></div>
+                <div id="resources" class="education-content"></div>
+                <div id="updates" class="education-content"></div>
+            </div>
+
+            <!-- Health Resources Section -->
+            <div id="health" class="content-section">
+                <div class="health-grid" id="healthGrid"></div>
+            </div>
+
+            <!-- Reports & Complaints Section -->
+            <div id="reports" class="content-section">
+                <div class="reports-container">
+                    <!-- Report Form -->
+                    <div class="report-form-container">
+                        <h2>📝 Submit Water Issue Report</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">Report water quality issues, contamination, or infrastructure problems in your area.</p>
+                        
+                        <form id="reportForm">
+                            <div class="form-group">
+                                <label class="form-label" for="issueType">Issue Type</label>
+                                <select class="form-select" id="issueType" required>
+                                    <option value="">Select issue type</option>
+                                    <option value="water_quality">Water Quality Problem</option>
+                                    <option value="contamination">Water Contamination</option>
+                                    <option value="infrastructure">Infrastructure Issue</option>
+                                    <option value="supply">Water Supply Problem</option>
+                                    <option value="other">Other Issue</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="location">Location/Village</label>
+                                <input type="text" class="form-input" id="location" placeholder="Enter your village or location" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="description">Issue Description</label>
+                                <textarea class="form-textarea" id="description" placeholder="Please describe the issue in detail..." required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="priority">Priority Level</label>
+                                <select class="form-select" id="priority" required>
+                                    <option value="low">Low Priority</option>
+                                    <option value="medium" selected>Medium Priority</option>
+                                    <option value="high">High Priority</option>
+                                    <option value="critical">Critical Emergency</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="contact">Contact Information (Optional)</label>
+                                <input type="text" class="form-input" id="contact" placeholder="Phone number or email">
+                            </div>
+                            
+                            <button type="submit" class="form-submit">Submit Report</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Complaints List -->
+                    <div class="complaints-list-container">
+                        <div class="complaints-header">
+                            <h2>📋 Recent Reports & Complaints</h2>
+                            <button class="btn btn-secondary" onclick="refreshComplaints()">🔄 Refresh</button>
+                        </div>
+                        
+                        <div class="complaints-list" id="complaintsList">
+                            <!-- Complaints will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="content-section">
+                <div class="stat-card">
+                    <h3 data-translate="settingsTitle">Settings</h3>
+                    <p data-translate="settingsDesc">Configure your dashboard preferences</p>
+                    
+                    <div style="margin-top: 20px;">
+                        <h4>Voice Alerts</h4>
+                        <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+                            <input type="checkbox" id="voiceAlerts" checked onchange="toggleVoiceAlerts(this.checked)">
+                            <label for="voiceAlerts">Enable voice alerts for unsafe water conditions</label>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <button class="btn" onclick="testVoiceAlert()">
+                                <i class="fas fa-volume-up"></i> Test Voice Alert
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div class="video-modal" id="videoModal">
+        <div class="video-modal-content">
+            <span class="video-modal-close" onclick="closeVideoModal()">&times;</span>
+            <h2 id="videoTitle"></h2>
+            <iframe id="videoFrame" class="video-frame" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced translations with DO and Turbidity parameters
+        const translations = {
+            en: {
+                appName: "WaveGenix",
+                welcome: "Welcome to WaveGenix",
+                navDashboard: "📊 Dashboard",
+                navMap: "🗺️ Village Map",
+                navAnalytics: "📈 Analytics",
+                navAlerts: "🔔 Alerts",
+                navQRGenerator: "📱 QR Generator",
+                navGame: "🎮 pH Learning Game",
+                navVillageHeads: "👥 Village Heads",
+                navEducation: "📚 Education Hub",
+                navHealth: "🏥 Health Resources",
+                navReports: "📝 Reports & Complaints",
+                navSettings: "⚙️ Settings",
+                phLevel: "pH Level",
+                tdsLevel: "TDS Level",
+                temperature: "Temperature",
+                turbidity: "Turbidity",
+                dissolvedOxygen: "Dissolved Oxygen",
+                waterQuality: "Water Quality",
+                good: "Good",
+                getLocation: "📍 Get My Location",
+                findWaterBodies: "💧 Find Water Bodies",
+                clearWaterBodies: "🗑️ Clear Water Bodies",
+                nearbyWaterBodies: "Nearby Water Bodies",
+                weeklyTrend: "Weekly Water Quality Trend",
+                villageComparison: "Village Comparison",
+                criticalAlert: "🚨 Critical Alert",
+                warningAlert: "⚠️ Warning",
+                infoAlert: "ℹ️ Information",
+                alertMsg1: "High TDS detected in Village A - Immediate action required",
+                alertMsg2: "pH levels approaching unsafe range in Village B",
+                alertMsg3: "Scheduled maintenance for sensors in Village C tomorrow",
+                nextQuestion: "Next Question",
+                restartQuiz: "Restart Quiz",
+                awarenessVideos: "🎥 Awareness Videos",
+                infographics: "📊 Infographics",
+                learningResources: "📖 Learning Resources",
+                latestUpdates: "📰 Latest Updates",
+                settingsTitle: "Settings",
+                settingsDesc: "Configure your dashboard preferences",
+                searching: "Searching for water bodies...",
+                noWaterBodies: "No water bodies found in your area",
+                river: "River",
+                lake: "Lake",
+                pond: "Pond",
+                well: "Well",
+                reservoir: "Reservoir",
+                ph: "pH",
+                turbidity: "Turbidity",
+                quality: "Quality",
+                submitReport: "Submit Report",
+                reportSubmitted: "Report Submitted Successfully",
+                reportError: "Error submitting report",
+                noComplaints: "No complaints found",
+                statusPending: "Pending",
+                statusInProgress: "In Progress",
+                statusResolved: "Resolved",
+                markResolved: "Mark Resolved",
+                deleteReport: "Delete",
+                mlPrediction: "AI Prediction",
+                waterSafe: "Water is SAFE to drink",
+                waterUnsafe: "🚨 Water is UNSAFE!",
+                confidence: "Confidence",
+                safetyAnalysis: "Safety Analysis",
+                emergencyAlert: "🚨 EMERGENCY: Unsafe water detected!",
+                blockchainBlocks: "Blocks",
+                blockchainAlerts: "Alerts",
+                blockchainPending: "Pending",
+                blockchainValid: "Chain Valid",
+                alertsAreGiven: "Alerts are given. Please review the current water quality alerts.",
+                excellent: "Excellent",
+                fair: "Fair",
+                poor: "Poor",
+                critical: "Critical"
+            },
+            hi: {
+                appName: "वेवजेनिक्स",
+                welcome: "वेवजेनिक्स में आपका स्वागत है",
+                navDashboard: "📊 डैशबोर्ड",
+                navMap: "🗺️ गांव का नक्शा",
+                navAnalytics: "📈 विश्लेषण",
+                navAlerts: "🔔 अलर्ट",
+                navQRGenerator: "📱 क्यूआर जेनरेटर",
+                navGame: "🎮 पीएच सीखने का खेल",
+                navVillageHeads: "👥 गांव के मुखिया",
+                navEducation: "📚 शिक्षा केंद्र",
+                navHealth: "🏥 स्वास्थ्य संसाधन",
+                navSettings: "⚙️ सेटिंग्स",
+                phLevel: "पीएच स्तर",
+                tdsLevel: "टीडीएस स्तर",
+                temperature: "तापमान",
+                turbidity: "गंदलापन",
+                dissolvedOxygen: "विलयित ऑक्सीजन",
+                waterQuality: "पानी की गुणवत्ता",
+                good: "अच्छा",
+                getLocation: "📍 मेरा स्थान प्राप्त करें",
+                findWaterBodies: "💧 पानी के स्रोत खोजें",
+                clearWaterBodies: "🗑️ पानी के स्रोत हटाएं",
+                nearbyWaterBodies: "आस-पास के पानी के स्रोत",
+                weeklyTrend: "साप्ताहिक जल गुणवत्ता रुझान",
+                villageComparison: "गांव की तुलना",
+                criticalAlert: "🚨 गंभीर चेतावनी",
+                warningAlert: "⚠️ चेतावनी",
+                infoAlert: "ℹ️ जानकारी",
+                alertMsg1: "गांव A में उच्च टीडीएस का पता चला - तत्काल कार्रवाई आवश्यक",
+                alertMsg2: "गांव B में पीएच स्तर असुरक्षित सीमा के करीब पहुंच रहा है",
+                alertMsg3: "कल गांव C में सेंसर के लिए निर्धारित रखरखाव",
+                nextQuestion: "अगला प्रश्न",
+                restartQuiz: "क्विज पुनः आरंभ करें",
+                awarenessVideos: "🎥 जागरूकता वीडियो",
+                infographics: "📊 इन्फोग्राफिक्स",
+                learningResources: "📖 सीखने के संसाधन",
+                latestUpdates: "📰 नवीनतम अपडेट",
+                settingsTitle: "सेटिंग्स",
+                settingsDesc: "अपने डैशबोर्ड प्राथमिकताएं कॉन्फ़िगर करें",
+                searching: "पानी के स्रोत खोज रहे हैं...",
+                noWaterBodies: "आपके क्षेत्र में कोई पानी का स्रोत नहीं मिला",
+                river: "नदी",
+                lake: "झील",
+                pond: "तालाब",
+                well: "कुआं",
+                reservoir: "जलाशय",
+                ph: "पीएच",
+                turbidity: "गंदलापन",
+                quality: "गुणवत्ता",
+                submitReport: "रिपोर्ट सबमिट करें",
+                reportSubmitted: "रिपोर्ट सफलतापूर्वक सबमिट की गई",
+                reportError: "रिपोर्ट सबमिट करने में त्रुटि",
+                noComplaints: "कोई शिकायत नहीं मिली",
+                statusPending: "लंबित",
+                statusInProgress: "प्रगति पर",
+                statusResolved: "हल हो गया",
+                markResolved: "हल किया गया चिह्नित करें",
+                deleteReport: "हटाएं",
+                mlPrediction: "AI Prediction",
+                waterSafe: "Water is SAFE to drink",
+                waterUnsafe: "🚨 Water is UNSAFE!",
+                confidence: "Confidence",
+                safetyAnalysis: "Safety Analysis",
+                emergencyAlert: "🚨 EMERGENCY: Unsafe water detected!",
+                blockchainBlocks: "Blocks",
+                blockchainAlerts: "Alerts",
+                blockchainPending: "Pending",
+                blockchainValid: "Chain Valid",
+                alertsAreGiven: "चेतावनियां दी गई हैं। कृपया वर्तमान जल गुणवत्ता चेतावनियों की समीक्षा करें।",
+                excellent: "उत्कृष्ट",
+                fair: "सामान्य",
+                poor: "खराब",
+                critical: "गंभीर"
+            }
+            // Other languages would follow the same pattern...
+        };
+
+        let currentLanguage = 'en';
+        let currentTheme = 'light';
+        let map;
+        let userMarker;
+        let waterBodyMarkers = [];
+        let mapInitialized = false;
+        let realTimeInterval;
+        let emergencyAlertActive = false;
+        let voiceAlertsEnabled = true;
+
+        // QR Generator Variables
+        let qrCodeInstance = null;
+        let waterQualityData = {
+            pH: 7.2,
+            TDS: 320,
+            temperature: 24,
+            turbidity: 0.8,
+            dissolvedOxygen: 6.5,
+            quality: "Good",
+            location: "Community Water Source",
+            lastUpdated: new Date().toLocaleString(),
+            recommendations: "Safe for drinking"
+        };
+
+        // Enhanced Backend API Integration with DO and Turbidity
+        class WaveGenixAPI {
+            constructor() {
+                this.baseURL = 'http://localhost:5000'; // Your Flask backend URL
+            }
+
+            // Get real-time IoT data from backend including DO and Turbidity
+            async getRealTimeData() {
+                try {
+                    const response = await fetch(`${this.baseURL}/api/iot-data`);
+                    if (!response.ok) throw new Error('Failed to fetch IoT data');
+                    const data = await response.json();
+                    return this.processIoTData(data);
+                } catch (error) {
+                    console.error('Error fetching IoT data:', error);
+                    return this.getMockData();
+                }
+            }
+
+            // Get ML predictions from backend
+            async getMLPredictions() {
+                try {
+                    const response = await fetch(`${this.baseURL}/api/ml-predictions`);
+                    if (!response.ok) throw new Error('Failed to fetch ML predictions');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error fetching ML predictions:', error);
+                    return this.getMockPredictions();
+                }
+            }
+
+            // Get blockchain alerts
+            async getBlockchainAlerts() {
+                try {
+                    const response = await fetch(`${this.baseURL}/api/alerts`);
+                    if (!response.ok) throw new Error('Failed to fetch alerts');
+                    const data = await response.json();
+                    return data.alerts || [];
+                } catch (error) {
+                    console.error('Error fetching alerts:', error);
+                    return this.getMockAlerts();
+                }
+            }
+
+            // Get blockchain info
+            async getBlockchainInfo() {
+                try {
+                    const response = await fetch(`${this.baseURL}/api/blockchain/info`);
+                    if (!response.ok) throw new Error('Failed to fetch blockchain info');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error fetching blockchain info:', error);
+                    return { chain_length: 1, pending_alerts: 0, is_valid: true, total_alerts: 0 };
+                }
+            }
+
+            // Process IoT data to match your ML model format including DO and Turbidity
+            processIoTData(data) {
+                return {
+                    pH: data.pH || data.Ph || 7.0,
+                    tds: data.tds || data.Conductivity || 300,
+                    turbidity: data.turbidity || data.Turbidity || 1.0,
+                    dissolvedOxygen: data.dissolvedOxygen || data.DO || data.oxygen || 6.5,
+                    temperature: data.temperature || data.Temperature || 25.0,
+                    deviceId: data.deviceId || 'Unknown',
+                    timestamp: data.timestamp || new Date().toISOString(),
+                    quality: data.quality || 'Good',
+                    ml_prediction: data.ml_prediction,
+                    ml_confidence: data.ml_confidence
+                };
+            }
+
+            // Mock data for fallback including DO and Turbidity
+            getMockData() {
+                return {
+                    pH: 7.2 + (Math.random() - 0.5) * 0.4,
+                    tds: 320 + (Math.random() - 0.5) * 40,
+                    temperature: 24 + (Math.random() - 0.5) * 2,
+                    turbidity: 0.8 + Math.random() * 0.4,
+                    dissolvedOxygen: 6.5 + (Math.random() - 0.5) * 0.5,
+                    timestamp: new Date().toISOString(),
+                    deviceId: "Mock_Device_001",
+                    quality: "Good"
+                };
+            }
+
+            getMockPredictions() {
+                const isSafe = Math.random() > 0.2; // 80% chance of safe water
+                return {
+                    prediction: isSafe ? 1 : 0,
+                    confidence: isSafe ? 0.85 + Math.random() * 0.1 : 0.75 + Math.random() * 0.2,
+                    safety_analysis: isSafe ? 
+                        ["✅ pH within safe range", "✅ TDS within safe range", "✅ Turbidity within safe range", "✅ DO levels optimal"] :
+                        ["🚨 pH too acidic", "⚠️ High TDS levels", "⚠️ High turbidity", "⚠️ Low dissolved oxygen"],
+                    recommendation: isSafe ? 
+                        "Water quality is good. No immediate action needed." :
+                        "🚨 WATER UNSAFE! Do not drink. Contact authorities immediately.",
+                    timestamp: new Date().toISOString()
+                };
+            }
+
+            getMockAlerts() {
+                return [
+                    {
+                        id: 'mock1',
+                        type: 'info',
+                        severity: 'low',
+                        message: 'System initialized successfully',
+                        timestamp: new Date().toISOString(),
+                        location: 'System',
+                        ml_confidence: 0.95
+                    },
+                    {
+                        id: 'mock2',
+                        type: 'warning',
+                        severity: 'medium',
+                        message: 'High turbidity detected in Village A',
+                        timestamp: new Date().toISOString(),
+                        location: 'Village A',
+                        ml_confidence: 0.82
+                    }
+                ];
+            }
+
+            // Get historical data for charts including DO and Turbidity
+            async getHistoricalData(days = 7) {
+                try {
+                    const response = await fetch(`${this.baseURL}/api/historical-data?days=${days}`);
+                    if (!response.ok) throw new Error('Failed to fetch historical data');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error fetching historical data:', error);
+                    return this.getMockHistoricalData(days);
+                }
+            }
+
+            getMockHistoricalData(days) {
+                const data = [];
+                const now = new Date();
+                
+                for (let i = days; i >= 0; i--) {
+                    const date = new Date(now);
+                    date.setDate(date.getDate() - i);
+                    
+                    data.push({
+                        date: date.toISOString().split('T')[0],
+                        pH: 7.0 + Math.random() * 0.8,
+                        tds: 280 + Math.random() * 120,
+                        temperature: 22 + Math.random() * 6,
+                        turbidity: 0.5 + Math.random() * 1.5,
+                        dissolvedOxygen: 6.0 + Math.random() * 2,
+                        quality: Math.random() > 0.3 ? "Good" : Math.random() > 0.5 ? "Moderate" : "Poor"
+                    });
+                }
+                
+                return data;
+            }
+
+            // Submit report to backend
+            async submitReport(reportData) {
+                try {
+                    const response = await fetch(`${this.baseURL}/api/reports`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(reportData)
+                    });
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error submitting report:', error);
+                    return { success: false, error: error.message };
+                }
+            }
+        }
+
+        // Initialize API
+        const waveGenixAPI = new WaveGenixAPI();
+
+        // Quality assessment functions for each parameter
+        function getPHQuality(pH) {
+            if (pH >= 6.5 && pH <= 8.5) return { status: 'excellent', class: 'status-excellent', icon: '✅' };
+            if (pH >= 6.0 && pH <= 9.0) return { status: 'good', class: 'status-good', icon: '⚠️' };
+            return { status: 'critical', class: 'status-critical', icon: '🚨' };
+        }
+
+        function getTDSQuality(tds) {
+            if (tds <= 300) return { status: 'excellent', class: 'status-excellent', icon: '✅' };
+            if (tds <= 500) return { status: 'good', class: 'status-good', icon: '✅' };
+            if (tds <= 1000) return { status: 'fair', class: 'status-fair', icon: '⚠️' };
+            return { status: 'critical', class: 'status-critical', icon: '🚨' };
+        }
+
+        function getTurbidityQuality(turbidity) {
+            if (turbidity <= 1) return { status: 'excellent', class: 'status-excellent', icon: '✅' };
+            if (turbidity <= 5) return { status: 'good', class: 'status-good', icon: '✅' };
+            if (turbidity <= 10) return { status: 'fair', class: 'status-fair', icon: '⚠️' };
+            return { status: 'critical', class: 'status-critical', icon: '🚨' };
+        }
+
+        function getDOQuality(doValue) {
+            if (doValue >= 6) return { status: 'excellent', class: 'status-excellent', icon: '✅' };
+            if (doValue >= 4) return { status: 'good', class: 'status-good', icon: '✅' };
+            if (doValue >= 2) return { status: 'fair', class: 'status-fair', icon: '⚠️' };
+            return { status: 'critical', class: 'status-critical', icon: '🚨' };
+        }
+
+        function getTemperatureQuality(temp) {
+            if (temp >= 15 && temp <= 25) return { status: 'excellent', class: 'status-excellent', icon: '✅' };
+            if (temp >= 10 && temp <= 30) return { status: 'good', class: 'status-good', icon: '✅' };
+            return { status: 'fair', class: 'status-fair', icon: '⚠️' };
+        }
+
+        // Quiz data
+        const quizData = [
+            {
+                question: "What is the ideal pH range for drinking water?",
+                options: ["5.5-6.5", "6.5-8.5", "8.5-9.5", "9.5-10.5"],
+                correct: 1,
+                explanation: "The ideal pH range for drinking water is 6.5-8.5. This range is considered safe and palatable for human consumption according to WHO guidelines."
+            },
+            {
+                question: "What does TDS stand for?",
+                options: ["Total Dissolved Solids", "Total Drinking Standards", "Temperature Distribution System", "Treated Drinking Supply"],
+                correct: 0,
+                explanation: "TDS stands for Total Dissolved Solids. It measures the combined content of all inorganic and organic substances in water."
+            },
+            {
+                question: "What is the maximum acceptable TDS level for drinking water (in ppm)?",
+                options: ["100", "300", "500", "1000"],
+                correct: 2,
+                explanation: "The maximum acceptable TDS level for drinking water is 500 ppm according to WHO standards. Water with TDS above this may have an unpleasant taste."
+            },
+            {
+                question: "What is the ideal range for Dissolved Oxygen in healthy water bodies?",
+                options: ["1-2 mg/L", "2-4 mg/L", "5-6 mg/L", "7-8 mg/L"],
+                correct: 2,
+                explanation: "The ideal range for Dissolved Oxygen in healthy water bodies is 5-6 mg/L. Levels below 3 mg/L can stress aquatic life."
+            },
+            {
+                question: "What does high turbidity in water indicate?",
+                options: ["High oxygen content", "Low mineral content", "Suspended particles", "High temperature"],
+                correct: 2,
+                explanation: "High turbidity indicates the presence of suspended particles like silt, clay, algae, or other microscopic organisms in the water."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answeredQuestions = 0;
+
+        // Reports data
+        let complaints = JSON.parse(localStorage.getItem('waterComplaints')) || [];
+
+        // Initialize everything
+        document.addEventListener('DOMContentLoaded', async function() {
+            await initializeDashboard();
+            initCharts();
+            initQuiz();
+            initEducationHub();
+            initHealthResources();
+            initVillageHeads();
+            initReports();
+            
+            // Load saved theme and language
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                currentTheme = savedTheme;
+                document.documentElement.setAttribute('data-theme', currentTheme);
+                document.getElementById('themeIcon').textContent = currentTheme === 'light' ? '🌙' : '☀️';
+            }
+            
+            const savedLang = localStorage.getItem('language');
+            if (savedLang) {
+                currentLanguage = savedLang;
+                document.querySelector('.language-selector').value = currentLanguage;
+                changeLanguage(currentLanguage);
+            }
+
+            // Load voice alerts setting
+            const savedVoiceAlerts = localStorage.getItem('voiceAlerts');
+            if (savedVoiceAlerts !== null) {
+                voiceAlertsEnabled = savedVoiceAlerts === 'true';
+                document.getElementById('voiceAlerts').checked = voiceAlertsEnabled;
+            }
+
+            // Initialize QR Generator with real data
+            setTimeout(() => {
+                refreshWaterQualityData();
+            }, 1000);
+
+            // Start real-time updates
+            startRealTimeUpdates();
+        });
+
+        // Initialize Dashboard with Real Data including DO and Turbidity
+        async function initializeDashboard() {
+            try {
+                const realTimeData = await waveGenixAPI.getRealTimeData();
+                const mlPredictions = await waveGenixAPI.getMLPredictions();
+                
+                updateDashboardStats(realTimeData, mlPredictions);
+                updateMLPredictionsDisplay(mlPredictions);
+                updateAlertsWithMLData(mlPredictions, realTimeData);
+            } catch (error) {
+                console.error('Error initializing dashboard:', error);
+                // Fallback to mock data
+                updateDashboardStats(
+                    waveGenixAPI.getMockData(),
+                    waveGenixAPI.getMockPredictions()
+                );
+            }
+        }
+
+        // Update Dashboard Stats with Real Data including DO and Turbidity
+        function updateDashboardStats(realTimeData, mlPredictions) {
+            const statsGrid = document.getElementById('dashboardStats');
+            
+            // Get quality assessments for each parameter
+            const phQuality = getPHQuality(realTimeData.pH);
+            const tdsQuality = getTDSQuality(realTimeData.tds);
+            const tempQuality = getTemperatureQuality(realTimeData.temperature);
+            const turbidityQuality = getTurbidityQuality(realTimeData.turbidity);
+            const doQuality = getDOQuality(realTimeData.dissolvedOxygen);
+
+            // Determine overall card class based on worst parameter
+            const cardClass = getWorstQualityClass([phQuality, tdsQuality, tempQuality, turbidityQuality, doQuality]);
+            
+            const stats = [
+                {
+                    label: translations[currentLanguage].phLevel,
+                    value: realTimeData.pH.toFixed(1),
+                    unit: "pH",
+                    quality: phQuality,
+                    icon: "🧪"
+                },
+                {
+                    label: translations[currentLanguage].tdsLevel,
+                    value: Math.round(realTimeData.tds),
+                    unit: "ppm",
+                    quality: tdsQuality,
+                    icon: "⚗️"
+                },
+                {
+                    label: translations[currentLanguage].temperature,
+                    value: Math.round(realTimeData.temperature),
+                    unit: "°C",
+                    quality: tempQuality,
+                    icon: "🌡️"
+                },
+                {
+                    label: translations[currentLanguage].turbidity,
+                    value: realTimeData.turbidity.toFixed(1),
+                    unit: "NTU",
+                    quality: turbidityQuality,
+                    icon: "💧"
+                },
+                {
+                    label: translations[currentLanguage].dissolvedOxygen,
+                    value: realTimeData.dissolvedOxygen.toFixed(1),
+                    unit: "mg/L",
+                    quality: doQuality,
+                    icon: "🫧"
+                },
+                {
+                    label: translations[currentLanguage].waterQuality,
+                    value: realTimeData.quality,
+                    unit: "",
+                    quality: { status: realTimeData.quality.toLowerCase(), class: `status-${realTimeData.quality.toLowerCase()}`, icon: "✅" },
+                    prediction: mlPredictions,
+                    icon: "📊"
+                }
+            ];
+
+            statsGrid.innerHTML = stats.map(stat => `
+                <div class="stat-card ${stat.quality.status === 'critical' ? 'critical' : stat.quality.status === 'fair' ? 'warning' : 'good'}">
+                    <div class="stat-label">
+                        <span>${stat.icon}</span>
+                        ${stat.label}
+                        <span class="parameter-status ${stat.quality.class}">
+                            ${stat.quality.icon} ${translations[currentLanguage][stat.quality.status] || stat.quality.status}
+                        </span>
+                    </div>
+                    <div class="stat-value">${stat.value} <span class="stat-unit">${stat.unit}</span></div>
+                    ${stat.prediction ? `
+                        <div class="ml-prediction ${getPredictionClass(stat.prediction)}">
+                            ${stat.prediction.prediction ? '✅ SAFE' : '🚨 UNSAFE'} 
+                            (${(stat.prediction.confidence * 100).toFixed(1)}% confidence)
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            // Update QR generator data with real values
+            waterQualityData = {
+                pH: realTimeData.pH,
+                TDS: realTimeData.tds,
+                temperature: realTimeData.temperature,
+                turbidity: realTimeData.turbidity,
+                dissolvedOxygen: realTimeData.dissolvedOxygen,
+                quality: realTimeData.quality,
+                location: "Community Water Source",
+                lastUpdated: new Date().toLocaleString()
+            };
+        }
+
+        function getWorstQualityClass(qualities) {
+            if (qualities.some(q => q.status === 'critical')) return 'critical';
+            if (qualities.some(q => q.status === 'fair')) return 'warning';
+            return 'good';
+        }
+
+        function getPredictionClass(prediction) {
+            if (prediction.prediction) {
+                return "prediction-safe";
+            } else if (prediction.confidence > 0.7) {
+                return "prediction-danger";
+            } else {
+                return "prediction-warning";
+            }
+        }
+
+        // Update ML Predictions Display
+        function updateMLPredictionsDisplay(predictions) {
+            const container = document.getElementById('mlPredictionsContent');
+            
+            if (!predictions) {
+                container.innerHTML = '<div class="loading">No prediction data available</div>';
+                return;
+            }
+
+            const isSafe = predictions.prediction;
+            const confidence = (predictions.confidence * 100).toFixed(1);
+            
+            container.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 20px;">
+                    <div style="font-size: 48px;">${isSafe ? '✅' : '🚨'}</div>
+                    <div>
+                        <h4 style="margin-bottom: 5px; color: ${isSafe ? 'var(--accent-secondary)' : 'var(--accent-danger)'}">
+                            ${isSafe ? translations[currentLanguage].waterSafe : translations[currentLanguage].waterUnsafe}
+                        </h4>
+                        <p style="color: var(--text-secondary);">${translations[currentLanguage].confidence}: ${confidence}%</p>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h5>${translations[currentLanguage].safetyAnalysis}:</h5>
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                        ${predictions.safety_analysis ? predictions.safety_analysis.map(analysis => `
+                            <div style="padding: 8px 12px; background: var(--bg-secondary); border-radius: 6px; font-size: 14px;">
+                                ${analysis}
+                            </div>
+                        `).join('') : 'No analysis available'}
+                    </div>
+                </div>
+                
+                <div style="padding: 12px; background: ${isSafe ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'}; 
+                            border: 1px solid ${isSafe ? 'var(--accent-secondary)' : 'var(--accent-danger)'}; 
+                            border-radius: 8px;">
+                    <strong>Recommendation:</strong> ${predictions.recommendation}
+                </div>
+                
+                <div style="margin-top: 15px; font-size: 12px; color: var(--text-secondary);">
+                    Last updated: ${new Date(predictions.timestamp).toLocaleString()}
+                </div>
+            `;
+
+            // Show emergency banner if water is unsafe
+            if (!isSafe && predictions.confidence > 0.7) {
+                showEmergencyBanner(predictions);
+            }
+        }
+
+        // Emergency Alert Functions
+        function showEmergencyBanner(predictions) {
+            if (emergencyAlertActive) return;
+            
+            emergencyAlertActive = true;
+            const banner = document.getElementById('emergencyBanner');
+            const message = document.getElementById('emergencyMessage');
+            
+            message.textContent = translations[currentLanguage].emergencyAlert + 
+                                ` Confidence: ${(predictions.confidence * 100).toFixed(1)}%`;
+            
+            banner.style.display = 'block';
+            
+            // Auto-hide after 30 seconds
+            setTimeout(() => {
+                closeEmergencyBanner();
+            }, 30000);
+        }
+
+        function closeEmergencyBanner() {
+            emergencyAlertActive = false;
+            document.getElementById('emergencyBanner').style.display = 'none';
+        }
+
+        // Update Alerts with Blockchain Data
+        async function updateAlertsWithBlockchain() {
+            const alertsContainer = document.getElementById('alertsContainer');
+            const blockchainInfo = document.getElementById('blockchainInfo');
+            
+            try {
+                const blockchainAlerts = await waveGenixAPI.getBlockchainAlerts();
+                const blockchainData = await waveGenixAPI.getBlockchainInfo();
+                
+                // Update blockchain status
+                blockchainInfo.innerHTML = `
+                    <div class="blockchain-stat">
+                        <div class="blockchain-value">${blockchainData.chain_length}</div>
+                        <div class="blockchain-label">${translations[currentLanguage].blockchainBlocks}</div>
+                    </div>
+                    <div class="blockchain-stat">
+                        <div class="blockchain-value">${blockchainData.total_alerts}</div>
+                        <div class="blockchain-label">${translations[currentLanguage].blockchainAlerts}</div>
+                    </div>
+                    <div class="blockchain-stat">
+                        <div class="blockchain-value">${blockchainData.pending_alerts}</div>
+                        <div class="blockchain-label">${translations[currentLanguage].blockchainPending}</div>
+                    </div>
+                    <div class="blockchain-stat">
+                        <div class="blockchain-value">${blockchainData.is_valid ? '✅' : '❌'}</div>
+                        <div class="blockchain-label">${translations[currentLanguage].blockchainValid}</div>
+                    </div>
+                `;
+                
+                if (blockchainAlerts.length === 0) {
+                    alertsContainer.innerHTML = `
+                        <div class="alert-card info">
+                            <h3>✅ No Active Alerts</h3>
+                            <p>All systems are operating normally. No water quality issues detected.</p>
+                            <small>Blockchain verified - All clear</small>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                alertsContainer.innerHTML = blockchainAlerts.map(alert => `
+                    <div class="alert-card ${alert.type} ${alert.severity === 'high' ? 'critical' : ''}">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div style="flex: 1;">
+                                <h3>${alert.type === 'critical' ? '🚨' : alert.type === 'warning' ? '⚠️' : 'ℹ️'} ${alert.message}</h3>
+                                <p><strong>Location:</strong> ${alert.location} | <strong>Severity:</strong> ${alert.severity}</p>
+                                ${alert.ml_confidence ? `<p><strong>ML Confidence:</strong> ${(alert.ml_confidence * 100).toFixed(1)}%</p>` : ''}
+                                <small>Blockchain Timestamp: ${new Date(alert.timestamp).toLocaleString()}</small>
+                            </div>
+                            <div style="font-size: 10px; color: var(--text-secondary); background: var(--bg-secondary); padding: 4px 8px; border-radius: 4px;">
+                                ID: ${alert.id}
+                            </div>
+                        </div>
+                        ${alert.parameters && Object.keys(alert.parameters).length > 0 ? `
+                            <div style="margin-top: 10px; padding: 10px; background: var(--bg-secondary); border-radius: 5px;">
+                                <strong>Parameters:</strong> 
+                                ${alert.parameters.pH ? `pH: ${alert.parameters.pH}, ` : ''}
+                                ${alert.parameters.tds ? `TDS: ${alert.parameters.tds}ppm, ` : ''}
+                                ${alert.parameters.turbidity ? `Turbidity: ${alert.parameters.turbidity}NTU, ` : ''}
+                                ${alert.parameters.dissolvedOxygen ? `DO: ${alert.parameters.dissolvedOxygen}mg/L` : ''}
+                                ${alert.parameters.issue_type ? `Issue: ${alert.parameters.issue_type}` : ''}
+                            </div>
+                        ` : ''}
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading blockchain alerts:', error);
+                alertsContainer.innerHTML = `
+                    <div class="alert-card warning">
+                        <h3>⚠️ Connection Issue</h3>
+                        <p>Unable to load blockchain alerts. Please check backend connection.</p>
+                        <small>Error: ${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+
+        // Update Alerts with ML Data
+        function updateAlertsWithMLData(predictions, iotData) {
+            // This function is kept for backward compatibility
+            // The main alerts are now handled by updateAlertsWithBlockchain()
+        }
+
+        // Real-time Updates
+        function startRealTimeUpdates() {
+            // Update every 10 seconds
+            realTimeInterval = setInterval(async () => {
+                try {
+                    const realTimeData = await waveGenixAPI.getRealTimeData();
+                    const mlPredictions = await waveGenixAPI.getMLPredictions();
+                    
+                    if (document.getElementById('dashboard').classList.contains('active')) {
+                        updateDashboardStats(realTimeData, mlPredictions);
+                        updateMLPredictionsDisplay(mlPredictions);
+                    }
+                    
+                    if (document.getElementById('alerts').classList.contains('active')) {
+                        await updateAlertsWithBlockchain();
+                    }
+                    
+                    // Update charts with new data
+                    updateChartsWithNewData(realTimeData);
+                    
+                } catch (error) {
+                    console.error('Error in real-time update:', error);
+                }
+            }, 10000);
+        }
+
+        function updateChartsWithNewData(data) {
+            if (window.dashboardChart) {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString();
+                
+                window.dashboardChart.data.labels.push(timeString);
+                window.dashboardChart.data.datasets[0].data.push(data.pH);
+                window.dashboardChart.data.datasets[1].data.push(data.tds);
+                window.dashboardChart.data.datasets[2].data.push(data.turbidity);
+                window.dashboardChart.data.datasets[3].data.push(data.dissolvedOxygen);
+                
+                if (window.dashboardChart.data.labels.length > 15) {
+                    window.dashboardChart.data.labels.shift();
+                    window.dashboardChart.data.datasets[0].data.shift();
+                    window.dashboardChart.data.datasets[1].data.shift();
+                    window.dashboardChart.data.datasets[2].data.shift();
+                    window.dashboardChart.data.datasets[3].data.shift();
+                }
+                
+                window.dashboardChart.update('quiet');
+            }
+        }
+
+        // Enhanced Charts Initialization with Real Data including DO and Turbidity
+        async function initCharts() {
+            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
+            const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+
+            const historicalData = await waveGenixAPI.getHistoricalData(7);
+
+            // Dashboard Chart
+            const dashboardCtx = document.getElementById('dashboardChart').getContext('2d');
+            window.dashboardChart = new Chart(dashboardCtx, {
+                type: 'line',
+                data: {
+                    labels: historicalData.map(d => new Date(d.date).toLocaleDateString()),
+                    datasets: [
+                        {
+                            label: 'pH Level',
+                            data: historicalData.map(d => d.pH),
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'TDS (ppm)',
+                            data: historicalData.map(d => d.tds),
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Turbidity (NTU)',
+                            data: historicalData.map(d => d.turbidity),
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Dissolved Oxygen (mg/L)',
+                            data: historicalData.map(d => d.dissolvedOxygen),
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: textColor }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        }
+                    }
+                }
+            });
+
+            // Analytics Chart
+            const analyticsCtx = document.getElementById('analyticsChart').getContext('2d');
+            window.analyticsChart = new Chart(analyticsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [
+                        {
+                            label: 'Average pH',
+                            data: [7.1, 7.2, 7.0, 7.2],
+                            backgroundColor: '#3b82f6'
+                        },
+                        {
+                            label: 'Average TDS',
+                            data: [315, 320, 310, 318],
+                            backgroundColor: '#10b981'
+                        },
+                        {
+                            label: 'Average Turbidity',
+                            data: [0.9, 0.8, 1.1, 0.8],
+                            backgroundColor: '#f59e0b'
+                        },
+                        {
+                            label: 'Average DO',
+                            data: [6.2, 6.5, 6.1, 6.4],
+                            backgroundColor: '#8b5cf6'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: textColor }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        }
+                    }
+                }
+            });
+
+            // Comparison Chart
+            const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+            window.comparisonChart = new Chart(comparisonCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['pH', 'TDS', 'Temperature', 'Turbidity', 'Dissolved Oxygen'],
+                    datasets: [
+                        {
+                            label: 'Village A',
+                            data: [7.2, 320, 24, 0.8, 6.5],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)'
+                        },
+                        {
+                            label: 'Village B',
+                            data: [6.8, 450, 26, 1.2, 5.8],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.2)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: textColor }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor },
+                            pointLabels: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Theme Toggle
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            document.getElementById('themeIcon').textContent = currentTheme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('theme', currentTheme);
+            
+            if (window.dashboardChart) updateChartTheme(window.dashboardChart);
+            if (window.analyticsChart) updateChartTheme(window.analyticsChart);
+            if (window.comparisonChart) updateChartTheme(window.comparisonChart);
+        }
+
+        function updateChartTheme(chart) {
+            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
+            const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+            
+            if (chart.options.scales) {
+                if (chart.options.scales.x) {
+                    chart.options.scales.x.ticks.color = textColor;
+                    chart.options.scales.x.grid.color = gridColor;
+                }
+                if (chart.options.scales.y) {
+                    chart.options.scales.y.ticks.color = textColor;
+                    chart.options.scales.y.grid.color = gridColor;
+                }
+                if (chart.options.scales.r) {
+                    chart.options.scales.r.ticks.color = textColor;
+                    chart.options.scales.r.grid.color = gridColor;
+                    chart.options.scales.r.pointLabels.color = textColor;
+                }
+            }
+            
+            if (chart.options.plugins && chart.options.plugins.legend) {
+                chart.options.plugins.legend.labels.color = textColor;
+            }
+            
+            chart.update();
+        }
+
+        // Language Change
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('language', lang);
+            const elements = document.querySelectorAll('[data-translate]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+        }
+
+        // Section Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if (sectionId === 'mapSection' && !mapInitialized) {
+                initMap();
+                mapInitialized = true;
+            }
+            
+            if (sectionId === 'reports') {
+                refreshComplaints();
+            }
+            
+            if (sectionId === 'dashboard' || sectionId === 'alerts') {
+                initializeDashboard();
+            }
+            
+            // Load blockchain alerts when alerts section is shown
+            if (sectionId === 'alerts') {
+                updateAlertsWithBlockchain();
+            }
+            
+            // Generate QR code when QR Generator section is shown
+            if (sectionId === 'qrGenerator') {
+                refreshWaterQualityData();
+            }
+            
+            // Play voice alert when Alerts section is shown
+            if (sectionId === 'alerts' && voiceAlertsEnabled) {
+                playAlertsVoiceNotification();
+            }
+        }
+
+        // Play voice alert for alerts section
+        function playAlertsVoiceNotification() {
+            const alertMessage = translations[currentLanguage].alertsAreGiven || "Alerts are given. Please review the current water quality alerts.";
+            
+            // Show the visual notification
+            const notificationDiv = document.getElementById('alertVoiceNotification');
+            const messageSpan = document.getElementById('alertVoiceMessage');
+            
+            messageSpan.textContent = alertMessage;
+            notificationDiv.style.display = 'flex';
+            
+            // Speak the alert
+            speakAlert(alertMessage);
+            
+            // Hide the notification after 5 seconds
+            setTimeout(() => {
+                notificationDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Voice Alerts
+        function speakAlert(message) {
+            if (!voiceAlertsEnabled) return;
+            
+            if ('speechSynthesis' in window) {
+                // Cancel any ongoing speech
+                window.speechSynthesis.cancel();
+                
+                const speech = new SpeechSynthesisUtterance();
+                speech.text = message;
+                speech.volume = 1;
+                speech.rate = 0.9;
+                speech.pitch = 1;
+                
+                // Set language based on current selection
+                switch(currentLanguage) {
+                    case 'hi':
+                        speech.lang = 'hi-IN';
+                        break;
+                    case 'ta':
+                        speech.lang = 'ta-IN';
+                        break;
+                    case 'te':
+                        speech.lang = 'te-IN';
+                        break;
+                    case 'ml':
+                        speech.lang = 'ml-IN';
+                        break;
+                    default:
+                        speech.lang = 'en-US';
+                }
+                
+                window.speechSynthesis.speak(speech);
+            }
+        }
+
+        function toggleVoiceAlerts(enabled) {
+            voiceAlertsEnabled = enabled;
+            localStorage.setItem('voiceAlerts', enabled);
+            
+            if (enabled) {
+                showSuccessMessage('Voice alerts enabled');
+            } else {
+                showSuccessMessage('Voice alerts disabled');
+            }
+        }
+
+        function testVoiceAlert() {
+            const testMessage = translations[currentLanguage].alertsAreGiven || "Alerts are given. Please review the current water quality alerts.";
+            speakAlert(testMessage);
+        }
+
+        // QR Generator Functions
+        async function refreshWaterQualityData() {
+            try {
+                // Show loading state
+                document.getElementById('phValue').textContent = 'Loading...';
+                document.getElementById('tdsValue').textContent = 'Loading...';
+                document.getElementById('tempValue').textContent = 'Loading...';
+                document.getElementById('turbidityValue').textContent = 'Loading...';
+                document.getElementById('doValue').textContent = 'Loading...';
+                document.getElementById('overallQuality').textContent = 'Loading...';
+                document.getElementById('qualityIndicator').textContent = 'Loading...';
+                document.getElementById('qualityIndicator').className = 'quality-indicator';
+                
+                // Fetch real-time data from backend
+                const realTimeData = await waveGenixAPI.getRealTimeData();
+                
+                // Update water quality data with real values
+                waterQualityData = {
+                    pH: realTimeData.pH,
+                    TDS: realTimeData.tds,
+                    temperature: realTimeData.temperature,
+                    turbidity: realTimeData.turbidity,
+                    dissolvedOxygen: realTimeData.dissolvedOxygen,
+                    quality: realTimeData.quality,
+                    location: "Community Water Source",
+                    lastUpdated: new Date().toLocaleString()
+                };
+                
+                // Update display with real data
+                updateQRDisplay();
+                
+                // Auto-generate QR code with new data
+                generateQRCode();
+                
+            } catch (error) {
+                console.error('Error refreshing water quality data:', error);
+                showErrorMessage('Failed to fetch water quality data. Using last known values.');
+            }
+        }
+
+        function determineWaterQuality() {
+            const phQuality = getPHQuality(waterQualityData.pH);
+            const tdsQuality = getTDSQuality(waterQualityData.TDS);
+            const turbidityQuality = getTurbidityQuality(waterQualityData.turbidity);
+            const doQuality = getDOQuality(waterQualityData.dissolvedOxygen);
+
+            // Determine overall quality based on worst parameter
+            if ([phQuality, tdsQuality, turbidityQuality, doQuality].some(q => q.status === 'critical')) {
+                return {
+                    status: "Poor",
+                    class: "quality-poor",
+                    message: "Water is not safe for drinking - Critical parameters detected"
+                };
+            } else if ([phQuality, tdsQuality, turbidityQuality, doQuality].some(q => q.status === 'fair')) {
+                return {
+                    status: "Moderate",
+                    class: "quality-moderate",
+                    message: "Water requires treatment before drinking"
+                };
+            } else {
+                return {
+                    status: "Good",
+                    class: "quality-good",
+                    message: "Water is safe for drinking"
+                };
+            }
+        }
+
+        function updateQRDisplay() {
+            // Update display with current water quality data
+            document.getElementById('phValue').textContent = waterQualityData.pH.toFixed(1);
+            document.getElementById('tdsValue').textContent = Math.round(waterQualityData.TDS) + ' ppm';
+            document.getElementById('tempValue').textContent = Math.round(waterQualityData.temperature) + '°C';
+            document.getElementById('turbidityValue').textContent = waterQualityData.turbidity.toFixed(1) + ' NTU';
+            document.getElementById('doValue').textContent = waterQualityData.dissolvedOxygen.toFixed(1) + ' mg/L';
+            document.getElementById('overallQuality').textContent = waterQualityData.quality;
+            
+            // Update quality indicator
+            const qualityInfo = determineWaterQuality();
+            const indicator = document.getElementById('qualityIndicator');
+            indicator.textContent = qualityInfo.status + ' Quality';
+            indicator.className = 'quality-indicator ' + qualityInfo.class;
+            
+            waterQualityData.recommendations = qualityInfo.message;
+        }
+
+        function generateQRCode() {
+            try {
+                console.log("Generating QR code...");
+                
+                // Show loading
+                document.getElementById('loadingText').style.display = 'block';
+                document.getElementById('loadingText').textContent = 'Generating QR Code...';
+                
+                // Update water quality data with current values
+                waterQualityData.lastUpdated = new Date().toLocaleString();
+                
+                // Determine current water quality
+                const qualityInfo = determineWaterQuality();
+                waterQualityData.quality = qualityInfo.status;
+                waterQualityData.recommendations = qualityInfo.message;
+
+                // Update display
+                updateQRDisplay();
+
+                // Trigger voice alert if water quality is poor
+                if (qualityInfo.status === "Poor" && voiceAlertsEnabled) {
+                    speakAlert("Warning! Water quality is poor. Do not drink without proper treatment.");
+                    
+                    // Show visual alert
+                    const alertDiv = document.createElement('div');
+                    alertDiv.className = 'voice-alert';
+                    alertDiv.innerHTML = '<i class="fas fa-volume-up"></i> Voice Alert: Water quality is poor!';
+                    document.querySelector('.water-quality-info').appendChild(alertDiv);
+                    
+                    // Remove alert after 5 seconds
+                    setTimeout(() => {
+                        if (alertDiv.parentNode) {
+                            alertDiv.parentNode.removeChild(alertDiv);
+                        }
+                    }, 5000);
+                }
+
+                // Create QR code content
+                const qrContent = `WATER QUALITY REPORT
+Location: ${waterQualityData.location}
+pH Level: ${waterQualityData.pH.toFixed(1)}
+TDS: ${Math.round(waterQualityData.TDS)} ppm
+Temperature: ${Math.round(waterQualityData.temperature)}°C
+Turbidity: ${waterQualityData.turbidity.toFixed(1)} NTU
+Dissolved Oxygen: ${waterQualityData.dissolvedOxygen.toFixed(1)} mg/L
+Overall Quality: ${waterQualityData.quality}
+Status: ${qualityInfo.message}
+Last Updated: ${waterQualityData.lastUpdated}
+
+Recommendations: ${waterQualityData.recommendations}`;
+
+                console.log("QR Content:", qrContent);
+
+                // Clear previous QR code
+                const qrContainer = document.getElementById('qrCode');
+                
+                // Generate QR code using QRCodeStyling
+                if (!qrCodeInstance) {
+                    qrCodeInstance = new QRCodeStyling({
+                        width: 200,
+                        height: 200,
+                        data: qrContent,
+                        dotsOptions: {
+                            color: "#000000",
+                            type: "rounded"
+                        },
+                        backgroundOptions: {
+                            color: "#ffffff",
+                        },
+                        imageOptions: {
+                            crossOrigin: "anonymous",
+                            margin: 10
+                        }
+                    });
+                    
+                    // Append to container
+                    qrCodeInstance.append(document.getElementById("qrCode"));
+                } else {
+                    // Update existing QR code
+                    qrCodeInstance.update({
+                        data: qrContent
+                    });
+                }
+
+                // Hide loading and show success
+                setTimeout(() => {
+                    document.getElementById('loadingText').style.display = 'none';
+                    document.getElementById('loadingText').textContent = 'QR Code Generated Successfully!';
+                    
+                    // Show success message
+                    showSuccessMessage('✅ QR Code Generated! Scan with your phone camera to view water quality report.');
+                }, 1000);
+
+            } catch (error) {
+                console.error('Error in generateQRCode:', error);
+                document.getElementById('loadingText').innerHTML = 
+                    '<div class="error-message">Failed to generate QR code: ' + error.message + '</div>';
+            }
+        }
+
+        function showSuccessMessage(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-message';
+            successDiv.textContent = message;
+            successDiv.style.marginTop = '10px';
+            successDiv.style.marginBottom = '10px';
+            
+            // Remove any existing success messages
+            const existingSuccess = document.querySelector('.success-message:not(#loadingText)');
+            if (existingSuccess) {
+                existingSuccess.remove();
+            }
+            
+            // Insert after the QR code
+            const qrContainer = document.getElementById('qrCode');
+            qrContainer.parentNode.insertBefore(successDiv, qrContainer.nextSibling);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                successDiv.remove();
+            }, 5000);
+        }
+
+        function showErrorMessage(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.textContent = message;
+            errorDiv.style.marginTop = '10px';
+            errorDiv.style.marginBottom = '10px';
+            
+            // Remove any existing error messages
+            const existingError = document.querySelector('.error-message:not(#loadingText)');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            // Insert after the QR code
+            const qrContainer = document.getElementById('qrCode');
+            qrContainer.parentNode.insertBefore(errorDiv, qrContainer.nextSibling);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+
+        function downloadQRCode() {
+            try {
+                if (qrCodeInstance) {
+                    qrCodeInstance.download({ name: "water-quality-qr", extension: "png" });
+                } else {
+                    alert('Please generate a QR code first by clicking "Generate QR Code"!');
+                }
+            } catch (error) {
+                console.error('Error downloading QR code:', error);
+                alert('Error downloading QR code. Please try generating the QR code first.');
+            }
+        }
+
+        // Social Sharing
+        function shareOnSocial(platform) {
+            const qualityInfo = determineWaterQuality();
+            const shareText = `Water Quality Report: ${waterQualityData.quality} - pH: ${waterQualityData.pH.toFixed(1)}, TDS: ${Math.round(waterQualityData.TDS)}ppm, Turbidity: ${waterQualityData.turbidity.toFixed(1)}NTU, DO: ${waterQualityData.dissolvedOxygen.toFixed(1)}mg/L`;
+            const shareUrl = window.location.href;
+            
+            let shareLink = '';
+            
+            switch(platform) {
+                case 'facebook':
+                    shareLink = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`;
+                    break;
+                case 'twitter':
+                    shareLink = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`;
+                    break;
+                case 'whatsapp':
+                    shareLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
+                    break;
+            }
+            
+            if (shareLink) {
+                window.open(shareLink, '_blank', 'width=600,height=400');
+            }
+        }
+
+        // Function to simulate different water conditions
+        function simulateWaterCondition(condition) {
+            switch(condition) {
+                case 'good':
+                    waterQualityData = {
+                        pH: 7.2,
+                        TDS: 250,
+                        temperature: 22,
+                        turbidity: 0.5,
+                        dissolvedOxygen: 7.2,
+                        location: "Community Water Source - Clean Well",
+                        lastUpdated: new Date().toLocaleString()
+                    };
+                    break;
+                case 'moderate':
+                    waterQualityData = {
+                        pH: 7.8,
+                        TDS: 650,
+                        temperature: 26,
+                        turbidity: 2.5,
+                        dissolvedOxygen: 4.8,
+                        location: "Community Water Source - River Point",
+                        lastUpdated: new Date().toLocaleString()
+                    };
+                    break;
+                case 'poor':
+                    waterQualityData = {
+                        pH: 5.8,
+                        TDS: 1200,
+                        temperature: 28,
+                        turbidity: 8.5,
+                        dissolvedOxygen: 2.1,
+                        location: "Community Water Source - Contaminated Area",
+                        lastUpdated: new Date().toLocaleString()
+                    };
+                    break;
+            }
+            
+            // Update display with simulated data
+            updateQRDisplay();
+            
+            // Auto-generate QR code for the new condition
+            generateQRCode();
+            
+            // Show which condition was selected
+            const conditionNames = {
+                'good': 'Good Water Conditions',
+                'moderate': 'Moderate Water Conditions', 
+                'poor': 'Poor Water Conditions'
+            };
+            
+            showSuccessMessage(`🔄 Testing ${conditionNames[condition]} - QR Code Updated!`);
+        }
+
+        // Map Functions
+        function initMap() {
+            const mapContainer = document.getElementById('mapContainer');
+            if (!mapContainer) {
+                console.error('Map container not found');
+                return;
+            }
+
+            map = L.map('mapContainer').setView([28.6139, 77.2090], 10);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Village data with real coordinates around Delhi including DO and Turbidity
+            const villages = [
+                {name: "Narela", lat: 28.8534, lng: 77.0931, ph: 7.2, tds: 320, turbidity: 0.8, do: 6.5, status: "Good"},
+                {name: "Bawana", lat: 28.7951, lng: 77.0297, ph: 6.8, tds: 450, turbidity: 2.1, do: 5.2, status: "Moderate"},
+                {name: "Alipur", lat: 28.7981, lng: 77.1331, ph: 7.5, tds: 280, turbidity: 0.6, do: 7.1, status: "Good"},
+                {name: "Kanjhawala", lat: 28.7644, lng: 77.0764, ph: 6.5, tds: 520, turbidity: 3.8, do: 4.5, status: "Poor"},
+                {name: "Najafgarh", lat: 28.6092, lng: 76.9798, ph: 7.1, tds: 380, turbidity: 1.2, do: 6.2, status: "Good"},
+                {name: "Dwarka", lat: 28.5921, lng: 77.0460, ph: 7.3, tds: 310, turbidity: 0.9, do: 6.8, status: "Good"},
+                {name: "Mehrauli", lat: 28.5244, lng: 77.1855, ph: 6.9, tds: 420, turbidity: 1.8, do: 5.8, status: "Moderate"},
+                {name: "Chhattarpur", lat: 28.5064, lng: 77.1750, ph: 7.0, tds: 390, turbidity: 1.1, do: 6.4, status: "Good"},
+                {name: "Sultanpur", lat: 28.4994, lng: 77.0631, ph: 6.7, tds: 480, turbidity: 2.5, do: 5.1, status: "Moderate"},
+                {name: "Ghitorni", lat: 28.4931, lng: 77.1189, ph: 7.2, tds: 340, turbidity: 0.7, do: 6.9, status: "Good"},
+                {name: "Kapashera", lat: 28.5311, lng: 77.0689, ph: 6.6, tds: 510, turbidity: 4.2, do: 4.2, status: "Poor"},
+                {name: "Bijwasan", lat: 28.5711, lng: 77.0589, ph: 7.4, tds: 295, turbidity: 0.5, do: 7.3, status: "Good"}
+            ];
+
+            villages.forEach(village => {
+                const color = village.status === 'Good' ? 'green' : village.status === 'Moderate' ? 'orange' : 'red';
+                const marker = L.circleMarker([village.lat, village.lng], {
+                    radius: 8,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <b>${village.name}</b><br>
+                    pH: ${village.ph}<br>
+                    TDS: ${village.tds} ppm<br>
+                    Turbidity: ${village.turbidity} NTU<br>
+                    Dissolved Oxygen: ${village.do} mg/L<br>
+                    Status: ${village.status}
+                `);
+            });
+
+            console.log('Map initialized successfully');
+        }
+
+        function getMyLocation() {
+            if (!map) {
+                alert('Map is not initialized. Please wait or refresh the page.');
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    if (userMarker) {
+                        map.removeLayer(userMarker);
+                    }
+                    
+                    userMarker = L.marker([lat, lng]).addTo(map);
+                    userMarker.bindPopup('<b>Your Location</b>').openPopup();
+                    map.setView([lat, lng], 13);
+                }, error => {
+                    alert('Unable to get your location. Please enable location services.');
+                });
+            } else {
+                alert('Geolocation is not supported by your browser.');
+            }
+        }
+
+        function findWaterBodies() {
+            if (!map || !userMarker) {
+                alert('Please get your location first.');
+                return;
+            }
+
+            const userLatLng = userMarker.getLatLng();
+            
+            // Show loading
+            const waterBodyGrid = document.getElementById('waterBodyGrid');
+            waterBodyGrid.innerHTML = `<div class="loading">${translations[currentLanguage].searching || 'Searching for water bodies...'}</div>`;
+            document.getElementById('waterBodyInfo').style.display = 'block';
+
+            // Clear existing water body markers
+            clearWaterBodies();
+
+            // Simulate API call with timeout
+            setTimeout(() => {
+                // Generate mock water bodies near user location
+                const waterBodies = generateMockWaterBodies(userLatLng.lat, userLatLng.lng);
+                
+                // Display water bodies on map and in info panel
+                displayWaterBodies(waterBodies, waterBodyGrid);
+            }, 1500);
+        }
+
+        function generateMockWaterBodies(userLat, userLng) {
+            const waterBodyTypes = ['river', 'lake', 'pond', 'well', 'reservoir'];
+            const waterBodies = [];
+            
+            // Generate 3-6 random water bodies near user location
+            const count = Math.floor(Math.random() * 4) + 3;
+            
+            for (let i = 0; i < count; i++) {
+                // Generate random coordinates within 5km of user
+                const lat = userLat + (Math.random() - 0.5) * 0.05;
+                const lng = userLng + (Math.random() - 0.5) * 0.05;
+                
+                const type = waterBodyTypes[Math.floor(Math.random() * waterBodyTypes.length)];
+                const ph = (Math.random() * 2 + 6.5).toFixed(1); // pH between 6.5-8.5
+                const turbidity = (Math.random() * 10).toFixed(1); // Turbidity between 0-10 NTU
+                const doValue = (4 + Math.random() * 4).toFixed(1); // DO between 4-8 mg/L
+                
+                // Determine quality based on multiple parameters
+                let quality = 'Good';
+                const poorCount = [ph < 6.5, ph > 8.5, turbidity > 5, doValue < 4].filter(Boolean).length;
+                const moderateCount = [ph < 6.0, ph > 9.0, turbidity > 8, doValue < 3].filter(Boolean).length;
+                
+                if (moderateCount > 0) quality = 'Poor';
+                else if (poorCount > 1) quality = 'Moderate';
+                
+                waterBodies.push({
+                    id: i,
+                    name: `${translations[currentLanguage][type] || type} ${i+1}`,
+                    type: type,
+                    lat: lat,
+                    lng: lng,
+                    ph: ph,
+                    turbidity: turbidity,
+                    dissolvedOxygen: doValue,
+                    quality: quality
+                });
+            }
+            
+            return waterBodies;
+        }
+
+        function displayWaterBodies(waterBodies, waterBodyGrid) {
+            waterBodyGrid.innerHTML = '';
+            
+            if (waterBodies.length === 0) {
+                waterBodyGrid.innerHTML = `<div class="loading">${translations[currentLanguage].noWaterBodies || 'No water bodies found in your area'}</div>`;
+                return;
+            }
+            
+            waterBodies.forEach(waterBody => {
+                // Add marker to map
+                const color = waterBody.quality === 'Good' ? 'green' : waterBody.quality === 'Moderate' ? 'orange' : 'red';
+                const marker = L.circleMarker([waterBody.lat, waterBody.lng], {
+                    radius: 10,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+                
+                marker.bindPopup(`
+                    <b>${waterBody.name}</b><br>
+                    ${translations[currentLanguage].ph || 'pH'}: ${waterBody.ph}<br>
+                    ${translations[currentLanguage].turbidity || 'Turbidity'}: ${waterBody.turbidity} NTU<br>
+                    ${translations[currentLanguage].dissolvedOxygen || 'Dissolved Oxygen'}: ${waterBody.dissolvedOxygen} mg/L<br>
+                    ${translations[currentLanguage].quality || 'Quality'}: ${waterBody.quality}
+                `);
+                
+                waterBodyMarkers.push(marker);
+                
+                // Add to info panel
+                const card = document.createElement('div');
+                card.className = 'water-body-card';
+                card.innerHTML = `
+                    <h4>${waterBody.name}</h4>
+                    <p><strong>${translations[currentLanguage].ph || 'pH'}:</strong> ${waterBody.ph}</p>
+                    <p><strong>${translations[currentLanguage].turbidity || 'Turbidity'}:</strong> ${waterBody.turbidity} NTU</p>
+                    <p><strong>${translations[currentLanguage].dissolvedOxygen || 'Dissolved Oxygen'}:</strong> ${waterBody.dissolvedOxygen} mg/L</p>
+                    <p><strong>${translations[currentLanguage].quality || 'Quality'}:</strong> <span style="color: ${color}">${waterBody.quality}</span></p>
+                `;
+                waterBodyGrid.appendChild(card);
+            });
+        }
+
+        function clearWaterBodies() {
+            // Remove all water body markers from map
+            waterBodyMarkers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            waterBodyMarkers = [];
+            
+            // Hide water body info panel
+            document.getElementById('waterBodyInfo').style.display = 'none';
+        }
+
+        // Quiz Functions
+        function initQuiz() {
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= quizData.length) {
+                showResults();
+                return;
+            }
+
+            const question = quizData[currentQuestion];
+            document.getElementById('quizQuestion').textContent = `Question ${currentQuestion + 1}: ${question.question}`;
+            document.getElementById('quizScore').textContent = `Score: ${score} / ${answeredQuestions}`;
+            document.getElementById('progressFill').style.width = `${(currentQuestion / quizData.length) * 100}%`;
+            
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            document.getElementById('quizExplanation').classList.remove('show');
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function selectAnswer(selectedIndex) {
+            const question = quizData[currentQuestion];
+            const options = document.querySelectorAll('.quiz-option');
+            
+            options.forEach((option, index) => {
+                option.onclick = null;
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                }
+                if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            answeredQuestions++;
+            if (selectedIndex === question.correct) {
+                score++;
+            } else {
+                // Show explanation for wrong answer
+                const explanationDiv = document.getElementById('quizExplanation');
+                explanationDiv.innerHTML = `<strong>Explanation:</strong> ${question.explanation}`;
+                explanationDiv.classList.add('show');
+            }
+
+            document.getElementById('quizScore').textContent = `Score: ${score} / ${answeredQuestions}`;
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        function showResults() {
+            const percentage = (score / quizData.length) * 100;
+            let message = '';
+            
+            if (percentage >= 80) {
+                message = 'Excellent! You have great knowledge about water quality!';
+            } else if (percentage >= 60) {
+                message = 'Good job! Keep learning about water quality.';
+            } else {
+                message = 'Keep practicing! Review the materials to improve your knowledge.';
+            }
+
+            document.getElementById('quizQuestion').textContent = `Quiz Complete!`;
+            document.getElementById('quizOptions').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <h2>Your Score: ${score} / ${quizData.length}</h2>
+                    <h3>${percentage.toFixed(1)}%</h3>
+                    <p style="margin-top: 20px; font-size: 18px;">${message}</p>
+                </div>
+            `;
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'block';
+            document.getElementById('progressFill').style.width = '100%';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answeredQuestions = 0;
+            document.getElementById('restartBtn').style.display = 'none';
+            loadQuestion();
+        }
+
+        // Education Hub
+        function showEducationTab(tabName) {
+            document.querySelectorAll('.education-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.education-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function initEducationHub() {
+            // Videos with updated YouTube links for water quality education
+            const videos = [
+                {
+                    title: "Understanding Water pH and Quality",
+                    description: "Learn about pH levels and their importance in water quality assessment",
+                    thumbnail: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=400",
+                    videoId: "W3a3X3eSoC8" // Actual educational video about water pH
+                },
+                {
+                    title: "Water Purification Methods Explained",
+                    description: "Explore different methods to purify water and make it safe for consumption",
+                    thumbnail: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400",
+                    videoId: "EzVPv7Kp1h0" // Educational video about water purification
+                },
+                {
+                    title: "Waterborne Diseases Prevention Guide",
+                    description: "How to prevent common waterborne diseases through proper water treatment",
+                    thumbnail: "https://images.unsplash.com/photo-1584515933487-779824d29309?w=400",
+                    videoId: "9H6GZ-_ojcI" // Educational video about waterborne diseases
+                },
+                {
+                    title: "TDS and Water Quality Parameters",
+                    description: "Understanding Total Dissolved Solids and other key water quality parameters",
+                    thumbnail: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400",
+                    videoId: "zLf5r6a2u-8" // Educational video about TDS
+                },
+                {
+                    title: "Dissolved Oxygen in Water Bodies",
+                    description: "The importance of dissolved oxygen for aquatic life and water quality",
+                    thumbnail: "https://images.unsplash.com/photo-1550537687-c91072c4792d?w=400",
+                    videoId: "Wm8O6pA0_6o" // Educational video about dissolved oxygen
+                },
+                {
+                    title: "Turbidity and Water Clarity Testing",
+                    description: "Understanding turbidity measurements and their significance",
+                    thumbnail: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400",
+                    videoId: "zT3S6OQm_4g" // Educational video about turbidity
+                }
+            ];
+
+            const videosContainer = document.getElementById('videos');
+            videos.forEach(video => {
+                const card = document.createElement('div');
+                card.className = 'resource-card';
+                card.onclick = () => openVideo(video.title, video.videoId);
+                card.innerHTML = `
+                    <img src="${video.thumbnail}" alt="${video.title}" class="resource-image">
+                    <div class="resource-content">
+                        <div class="resource-title">${video.title}</div>
+                        <div class="resource-description">${video.description}</div>
+                    </div>
+                `;
+                videosContainer.appendChild(card);
+            });
+
+            // Infographics with Charts including DO and Turbidity
+            const infographicsContainer = document.getElementById('infographics');
+            infographicsContainer.innerHTML = `
+                <div class="chart-container">
+                    <h3>Water Quality Standards</h3>
+                    <canvas id="infographicChart1"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Water Parameter Importance</h3>
+                    <canvas id="infographicChart2"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Village Water Quality Comparison</h3>
+                    <canvas id="infographicChart3"></canvas>
+                </div>
+            `;
+
+            // Initialize infographic charts
+            setTimeout(() => {
+                const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
+                
+                // Chart 1: Water Quality Standards
+                const ctx1 = document.getElementById('infographicChart1').getContext('2d');
+                new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['pH Min', 'pH Max', 'TDS Max', 'Turbidity Max', 'DO Min'],
+                        datasets: [{
+                            label: 'WHO Standards',
+                            data: [6.5, 8.5, 500, 1, 4],
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            x: { ticks: { color: textColor } },
+                            y: { ticks: { color: textColor } }
+                        }
+                    }
+                });
+
+                // Chart 2: Parameter Importance
+                const ctx2 = document.getElementById('infographicChart2').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['pH Level', 'TDS', 'Turbidity', 'Dissolved Oxygen', 'Temperature'],
+                        datasets: [{
+                            data: [25, 20, 20, 25, 10],
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#64748b']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: textColor } }
+                        }
+                    }
+                });
+
+                // Chart 3: Village Comparison
+                const ctx3 = document.getElementById('infographicChart3').getContext('2d');
+                new Chart(ctx3, {
+                    type: 'radar',
+                    data: {
+                        labels: ['pH', 'TDS', 'Temperature', 'Turbidity', 'Dissolved Oxygen'],
+                        datasets: [
+                            {
+                                label: 'Village A',
+                                data: [7.2, 320, 24, 0.8, 6.5],
+                                borderColor: '#3b82f6',
+                                backgroundColor: 'rgba(59, 130, 246, 0.2)'
+                            },
+                            {
+                                label: 'Village B',
+                                data: [6.8, 450, 26, 1.2, 5.8],
+                                borderColor: '#10b981',
+                                backgroundColor: 'rgba(16, 185, 129, 0.2)'
+                            },
+                            {
+                                label: 'Village C',
+                                data: [7.5, 280, 23, 0.6, 7.1],
+                                borderColor: '#f59e0b',
+                                backgroundColor: 'rgba(245, 158, 11, 0.2)'
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            r: {
+                                ticks: { color: textColor },
+                                pointLabels: { color: textColor }
+                            }
+                        }
+                    }
+                });
+            }, 100);
+
+            // Learning Resources with Images
+            const resources = [
+                {
+                    title: "WHO Water Quality Guidelines",
+                    description: "Comprehensive guidelines for safe drinking water including DO and turbidity standards",
+                    image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400",
+                    link: "https://www.who.int/water_sanitation_health/publications/drinking-water-quality-guidelines"
+                },
+                {
+                    title: "EPA Water Quality Parameters",
+                    description: "Detailed information on water quality parameters and their significance",
+                    image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400",
+                    link: "https://www.epa.gov/learn-issues/learn-about-water"
+                },
+                {
+                    title: "UNICEF Water & Sanitation",
+                    description: "Global water and sanitation programs with focus on water quality",
+                    image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400",
+                    link: "https://www.unicef.org/wash"
+                },
+                {
+                    title: "CDC Water Treatment Guidelines",
+                    description: "Water treatment and purification methods for safe drinking water",
+                    image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=400",
+                    link: "https://www.cdc.gov/healthywater/drinking/home-water-treatment/index.html"
+                },
+                {
+                    title: "Water Quality Testing Manual",
+                    description: "Comprehensive guide to water quality testing procedures",
+                    image: "https://images.unsplash.com/photo-1584515933487-779824d29309?w=400",
+                    link: "https://www.wateraid.org/in/"
+                },
+                {
+                    title: "Jal Jeevan Mission Resources",
+                    description: "India's water supply program resources and water quality standards",
+                    image: "https://images.unsplash.com/photo-1550537687-c91072c4792d?w=400",
+                    link: "https://jaljeevanmission.gov.in/"
+                }
+            ];
+
+            const resourcesContainer = document.getElementById('resources');
+            resources.forEach(resource => {
+                const card = document.createElement('div');
+                card.className = 'resource-card';
+                card.onclick = () => window.open(resource.link, '_blank');
+                card.innerHTML = `
+                    <img src="${resource.image}" alt="${resource.title}" class="resource-image">
+                    <div class="resource-content">
+                        <div class="resource-title">${resource.title}</div>
+                        <div class="resource-description">${resource.description}</div>
+                    </div>
+                `;
+                resourcesContainer.appendChild(card);
+            });
+
+            // Latest Updates
+            const updates = [
+                {
+                    title: "New Water Quality Sensors Installed",
+                    description: "Advanced IoT sensors for DO and turbidity monitoring deployed in 5 new villages",
+                    date: "2 days ago"
+                },
+                {
+                    title: "Water Quality Improvement in Village A",
+                    description: "pH and DO levels normalized after treatment plant upgrade",
+                    date: "1 week ago"
+                },
+                {
+                    title: "Community Training Program on Water Testing",
+                    description: "Water quality awareness workshop conducted focusing on turbidity and DO testing",
+                    date: "2 weeks ago"
+                },
+                {
+                    title: "Monsoon Water Safety Guidelines Updated",
+                    description: "Special precautions for rainy season with focus on turbidity control",
+                    date: "3 weeks ago"
+                }
+            ];
+
+            const updatesContainer = document.getElementById('updates');
+            updates.forEach(update => {
+                const card = document.createElement('div');
+                card.className = 'resource-card';
+                card.innerHTML = `
+                    <div class="resource-content">
+                        <div class="resource-title">${update.title}</div>
+                        <div class="resource-description">${update.description}</div>
+                        <small style="color: var(--text-secondary);">${update.date}</small>
+                    </div>
+                `;
+                updatesContainer.appendChild(card);
+            });
+        }
+
+        function openVideo(title, videoId) {
+            document.getElementById('videoTitle').textContent = title;
+            document.getElementById('videoFrame').src = `https://www.youtube.com/embed/${videoId}`;
+            document.getElementById('videoModal').classList.add('active');
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').classList.remove('active');
+            document.getElementById('videoFrame').src = '';
+        }
+
+        // Health Resources
+        function initHealthResources() {
+            const healthData = [
+                {
+                    icon: "💧",
+                    title: "Waterborne Diseases Prevention",
+                    description: "Understanding and preventing water-related illnesses through proper water quality management",
+                    tips: [
+                        "Always drink boiled or purified water",
+                        "Monitor water turbidity regularly",
+                        "Ensure adequate dissolved oxygen in stored water",
+                        "Test water pH levels monthly"
+                    ]
+                },
+                {
+                    icon: "🏥",
+                    title: "Cholera Prevention & Water Quality",
+                    description: "Protect yourself and your family from cholera through proper water treatment",
+                    tips: [
+                        "Maintain water pH between 6.5-8.5",
+                        "Ensure low turbidity in drinking water",
+                        "Use water filters for additional protection",
+                        "Monitor water quality parameters regularly"
+                    ]
+                },
+                {
+                    icon: "🦠",
+                    title: "Typhoid Awareness & Water Safety",
+                    description: "Symptoms, prevention, and treatment of typhoid with focus on water quality",
+                    tips: [
+                        "Check TDS levels in drinking water",
+                        "Ensure proper dissolved oxygen levels",
+                        "Avoid water with high turbidity",
+                        "Maintain personal hygiene with safe water"
+                    ]
+                },
+                {
+                    icon: "🩺",
+                    title: "Diarrheal Diseases Management",
+                    description: "Managing and preventing diarrhea through water quality control",
+                    tips: [
+                        "Use ORS solution made with safe water",
+                        "Monitor water temperature for bacterial growth",
+                        "Check all water quality parameters",
+                        "Seek medical help if symptoms persist"
+                    ]
+                },
+                {
+                    icon: "🧪",
+                    title: "Comprehensive Water Testing",
+                    description: "Regular water quality monitoring including DO and turbidity",
+                    tips: [
+                        "Test water pH and TDS regularly",
+                        "Monitor turbidity levels weekly",
+                        "Check dissolved oxygen monthly",
+                        "Report abnormal readings immediately"
+                    ]
+                },
+                {
+                    icon: "🛡️",
+                    title: "Preventive Water Quality Measures",
+                    description: "Daily practices for safe water consumption and quality maintenance",
+                    tips: [
+                        "Clean water storage tanks monthly",
+                        "Use multi-stage water purifiers",
+                        "Maintain optimal water temperature",
+                        "Regularly test all water parameters"
+                    ]
+                }
+            ];
+
+            const healthGrid = document.getElementById('healthGrid');
+            healthData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'health-card';
+                card.innerHTML = `
+                    <div class="health-icon">${item.icon}</div>
+                    <div class="health-title">${item.title}</div>
+                    <div class="health-description">${item.description}</div>
+                    <ul class="health-tips">
+                        ${item.tips.map(tip => `<li>${tip}</li>`).join('')}
+                    </ul>
+                `;
+                healthGrid.appendChild(card);
+            });
+        }
+
+        // Village Heads
+        function initVillageHeads() {
+            const villageHeads = [
+                {name: "Rajesh Kumar", village: "Narela", phone: "+91 98765 43210"},
+                {name: "Priya Sharma", village: "Bawana", phone: "+91 98765 43211"},
+                {name: "Amit Singh", village: "Alipur", phone: "+91 98765 43212"},
+                {name: "Sunita Devi", village: "Kanjhawala", phone: "+91 98765 43213"},
+                {name: "Ramesh Yadav", village: "Najafgarh", phone: "+91 98765 43214"},
+                {name: "Kavita Gupta", village: "Dwarka", phone: "+91 98765 43215"},
+                {name: "Vijay Verma", village: "Mehrauli", phone: "+91 98765 43216"},
+                {name: "Anita Patel", village: "Chhattarpur", phone: "+91 98765 43217"},
+                {name: "Suresh Reddy", village: "Sultanpur", phone: "+91 98765 43218"},
+                {name: "Meena Joshi", village: "Ghitorni", phone: "+91 98765 43219"},
+                {name: "Rakesh Mehta", village: "Kapashera", phone: "+91 98765 43220"},
+                {name: "Pooja Agarwal", village: "Bijwasan", phone: "+91 98765 43221"}
+            ];
+
+            const grid = document.getElementById('villageHeadsGrid');
+            villageHeads.forEach(head => {
+                const card = document.createElement('div');
+                card.className = 'village-head-card';
+                card.innerHTML = `
+                    <div class="village-head-avatar">👤</div>
+                    <h3>${head.name}</h3>
+                    <p style="color: var(--text-secondary);">${head.village}</p>
+                    <p style="color: var(--accent-primary); margin-top: 10px;">📞 ${head.phone}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Reports & Complaints Functions
+        function initReports() {
+            // Load complaints from localStorage
+            const savedComplaints = localStorage.getItem('waterComplaints');
+            if (savedComplaints) {
+                complaints = JSON.parse(savedComplaints);
+            }
+            
+            // Set up form submission
+            document.getElementById('reportForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                await submitReport();
+            });
+            
+            // Initial load of complaints
+            refreshComplaints();
+        }
+
+        async function submitReport() {
+            const issueType = document.getElementById('issueType').value;
+            const location = document.getElementById('location').value;
+            const description = document.getElementById('description').value;
+            const priority = document.getElementById('priority').value;
+            const contact = document.getElementById('contact').value;
+            
+            const reportData = {
+                type: issueType,
+                location: location,
+                description: description,
+                priority: priority,
+                contact: contact
+            };
+
+            // Try to submit to backend first
+            const result = await waveGenixAPI.submitReport(reportData);
+            
+            if (result.success) {
+                alert(translations[currentLanguage].reportSubmitted);
+                document.getElementById('reportForm').reset();
+                refreshComplaints();
+            } else {
+                // Fallback to localStorage
+                const newComplaint = {
+                    id: Date.now(),
+                    ...reportData,
+                    status: "pending",
+                    date: new Date().toISOString().split('T')[0]
+                };
+                
+                complaints.unshift(newComplaint);
+                localStorage.setItem('waterComplaints', JSON.stringify(complaints));
+                alert(translations[currentLanguage].reportSubmitted);
+                document.getElementById('reportForm').reset();
+                refreshComplaints();
+            }
+        }
+
+        function refreshComplaints() {
+            const complaintsList = document.getElementById('complaintsList');
+            
+            if (complaints.length === 0) {
+                complaintsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <h3>${translations[currentLanguage].noComplaints || 'No complaints found'}</h3>
+                        <p>Submit a report using the form on the left to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            complaintsList.innerHTML = '';
+            
+            complaints.forEach(complaint => {
+                const complaintCard = document.createElement('div');
+                complaintCard.className = `complaint-card ${complaint.status === 'resolved' ? 'resolved' : ''} ${complaint.priority === 'critical' ? 'critical' : ''}`;
+                
+                // Get status text based on current language
+                let statusText = '';
+                if (complaint.status === 'pending') {
+                    statusText = translations[currentLanguage].statusPending || 'Pending';
+                } else if (complaint.status === 'in-progress') {
+                    statusText = translations[currentLanguage].statusInProgress || 'In Progress';
+                } else {
+                    statusText = translations[currentLanguage].statusResolved || 'Resolved';
+                }
+                
+                // Get type display text
+                const typeText = getTypeDisplayText(complaint.type);
+                
+                complaintCard.innerHTML = `
+                    <div class="complaint-header">
+                        <div>
+                            <div class="complaint-title">${typeText} - ${complaint.location}</div>
+                            <div class="complaint-meta">
+                                <span>${complaint.date}</span>
+                                <span>Priority: ${complaint.priority}</span>
+                            </div>
+                        </div>
+                        <span class="complaint-status status-${complaint.status}">${statusText}</span>
+                    </div>
+                    <div class="complaint-description">${complaint.description}</div>
+                    ${complaint.contact ? `<div class="complaint-meta">Contact: ${complaint.contact}</div>` : ''}
+                    <div class="complaint-actions">
+                        ${complaint.status !== 'resolved' ? 
+                            `<button class="action-btn resolve-btn" onclick="resolveComplaint(${complaint.id})">
+                                ${translations[currentLanguage].markResolved || 'Mark Resolved'}
+                            </button>` : ''
+                        }
+                        <button class="action-btn delete-btn" onclick="deleteComplaint(${complaint.id})">
+                            ${translations[currentLanguage].deleteReport || 'Delete'}
+                        </button>
+                    </div>
+                `;
+                
+                complaintsList.appendChild(complaintCard);
+            });
+        }
+
+        function getTypeDisplayText(type) {
+            const typeMap = {
+                'water_quality': 'Water Quality Issue',
+                'contamination': 'Water Contamination',
+                'infrastructure': 'Infrastructure Issue',
+                'supply': 'Water Supply Issue',
+                'other': 'Other Issue'
+            };
+            return typeMap[type] || 'Unknown Issue';
+        }
+
+        function resolveComplaint(id) {
+            const complaintIndex = complaints.findIndex(c => c.id === id);
+            if (complaintIndex !== -1) {
+                complaints[complaintIndex].status = 'resolved';
+                localStorage.setItem('waterComplaints', JSON.stringify(complaints));
+                refreshComplaints();
+            }
+        }
+
+        function deleteComplaint(id) {
+            if (confirm('Are you sure you want to delete this report?')) {
+                complaints = complaints.filter(c => c.id !== id);
+                localStorage.setItem('waterComplaints', JSON.stringify(complaints));
+                refreshComplaints();
+            }
+        }
+
+        // Clean up
+        window.addEventListener('beforeunload', () => {
+            if (realTimeInterval) {
+                clearInterval(realTimeInterval);
+            }
+        });
+
+    </script>
+</body>
+</html>

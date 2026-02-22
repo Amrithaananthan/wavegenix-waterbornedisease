@@ -1,0 +1,23 @@
+{
+  "model_type": "xgboost",
+  "accuracy": 0.6570121951219512,
+  "features": [
+    "ph",
+    "Hardness",
+    "Solids",
+    "Chloramines",
+    "Sulfate",
+    "Conductivity",
+    "Organic_carbon",
+    "Trihalomethanes",
+    "Turbidity",
+    "quality_index",
+    "ph_risk",
+    "Chloramines_risk",
+    "Sulfate_risk",
+    "Organic_carbon_risk",
+    "Trihalomethanes_risk"
+  ],
+  "timestamp": "20250923_205412",
+  "version": "2.0_enhanced"
+}

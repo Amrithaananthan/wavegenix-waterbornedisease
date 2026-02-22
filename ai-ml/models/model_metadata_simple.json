@@ -1,0 +1,25 @@
+{
+  "features": [
+    "ph",
+    "Hardness",
+    "Solids",
+    "Chloramines",
+    "Sulfate",
+    "Conductivity",
+    "Organic_carbon",
+    "Trihalomethanes",
+    "Turbidity"
+  ],
+  "feature_importance": {
+    "ph": 0.1243326663039379,
+    "Hardness": 0.12105215223255779,
+    "Solids": 0.11410054779531867,
+    "Chloramines": 0.11588579638325584,
+    "Sulfate": 0.1257195268906469,
+    "Conductivity": 0.10341801067327679,
+    "Organic_carbon": 0.10209512606465432,
+    "Trihalomethanes": 0.09738657669774799,
+    "Turbidity": 0.09600959695860392
+  },
+  "dataset_used": "D:\\sihdeeo\\ai-ml\\datasets\\water_potability.csv",
+  "accuracy": 

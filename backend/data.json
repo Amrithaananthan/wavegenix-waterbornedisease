@@ -1,0 +1,1602 @@
+[
+  {
+    "deviceId": "device_4",
+    "pH": 8.82,
+    "turbidity": 19.81,
+    "tds": 825,
+    "temperature": 29.85,
+    "location": {
+      "lat": 13.090855759654177,
+      "lng": 80.27630210831452
+    },
+    "source": "Chennai Water Supply",
+    "region": "Tamil Nadu",
+    "type": "reservoir",
+    "timestamp": "2025-09-17T14:33:16.082Z",
+    "_id": "1758119596082"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 6.49,
+    "turbidity": 12.4,
+    "tds": 906,
+    "temperature": 32.72,
+    "location": {
+      "lat": 9.500698506739234,
+      "lng": 76.34130051461521
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:33:19.094Z",
+    "_id": "1758119599094"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 8.22,
+    "turbidity": 27.69,
+    "tds": 975,
+    "temperature": 23.72,
+    "location": {
+      "lat": 25.424586115542084,
+      "lng": 81.87662430721893
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:33:22.097Z",
+    "_id": "1758119602097"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 6.2,
+    "turbidity": 31.07,
+    "tds": 980,
+    "temperature": 27.38,
+    "location": {
+      "lat": 9.501412527500625,
+      "lng": 76.3481511107578
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:33:25.108Z",
+    "_id": "1758119605108"
+  },
+  {
+    "deviceId": "device_4",
+    "pH": 8.73,
+    "turbidity": 10.63,
+    "tds": 368,
+    "temperature": 30.68,
+    "location": {
+      "lat": 13.084537333317062,
+      "lng": 80.27693909457052
+    },
+    "source": "Chennai Water Supply",
+    "region": "Tamil Nadu",
+    "type": "reservoir",
+    "timestamp": "2025-09-17T14:33:28.111Z",
+    "_id": "1758119608111"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 7.24,
+    "turbidity": 16.06,
+    "tds": 383,
+    "temperature": 34.99,
+    "location": {
+      "lat": 19.071024797365443,
+      "lng": 72.87201390412773
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:33:31.123Z",
+    "_id": "1758119611123"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 6.64,
+    "turbidity": 11.26,
+    "tds": 879,
+    "temperature": 34.9,
+    "location": {
+      "lat": 25.427687712605906,
+      "lng": 81.88516003645503
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:33:34.126Z",
+    "_id": "1758119614126"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 7.86,
+    "turbidity": 33.56,
+    "tds": 932,
+    "temperature": 33.39,
+    "location": {
+      "lat": 9.492930185918826,
+      "lng": 76.33261705263273
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:33:37.137Z",
+    "_id": "1758119617137"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 8.96,
+    "turbidity": 31.91,
+    "tds": 753,
+    "temperature": 22.08,
+    "location": {
+      "lat": 25.421143202070766,
+      "lng": 81.88211179982703
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:33:40.142Z",
+    "_id": "1758119620142"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 6.65,
+    "turbidity": 10.09,
+    "tds": 954,
+    "temperature": 21.18,
+    "location": {
+      "lat": 19.072138339154534,
+      "lng": 72.86777159794016
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:33:43.152Z",
+    "_id": "1758119623152"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 6.72,
+    "turbidity": 21.65,
+    "tds": 544,
+    "temperature": 25.98,
+    "location": {
+      "lat": 28.620197155343806,
+      "lng": 77.21512502925954
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:33:46.155Z",
+    "_id": "1758119626155"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 7.72,
+    "turbidity": 39.05,
+    "tds": 610,
+    "temperature": 21.49,
+    "location": {
+      "lat": 28.616336148594105,
+      "lng": 77.21818035852884
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:33:49.170Z",
+    "_id": "1758119629170"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 8.61,
+    "turbidity": 38.64,
+    "tds": 459,
+    "temperature": 21.64,
+    "location": {
+      "lat": 9.499733755528434,
+      "lng": 76.34457396930229
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:33:52.182Z",
+    "_id": "1758119632182"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 8.3,
+    "turbidity": 34.91,
+    "tds": 729,
+    "temperature": 20.02,
+    "location": {
+      "lat": 25.309225096654142,
+      "lng": 83.01510241565798
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:33:55.193Z",
+    "_id": "1758119635193"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 6.92,
+    "turbidity": 20.22,
+    "tds": 358,
+    "temperature": 33.56,
+    "location": {
+      "lat": 28.604935327157772,
+      "lng": 77.20725994852445
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:33:58.194Z",
+    "_id": "1758119638194"
+  },
+  {
+    "deviceId": "device_3",
+    "pH": 7.96,
+    "turbidity": 21.72,
+    "tds": 555,
+    "temperature": 30.82,
+    "location": {
+      "lat": 26.76307465000978,
+      "lng": 92.11046790955184
+    },
+    "source": "Brahmaputra",
+    "region": "Assam",
+    "type": "river",
+    "timestamp": "2025-09-17T14:34:01.200Z",
+    "_id": "1758119641200"
+  },
+  {
+    "deviceId": "device_3",
+    "pH": 7.77,
+    "turbidity": 22.99,
+    "tds": 692,
+    "temperature": 30.63,
+    "location": {
+      "lat": 26.752768563054477,
+      "lng": 92.10312663137107
+    },
+    "source": "Brahmaputra",
+    "region": "Assam",
+    "type": "river",
+    "timestamp": "2025-09-17T14:34:04.211Z",
+    "_id": "1758119644211"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 6.4,
+    "turbidity": 19.09,
+    "tds": 872,
+    "temperature": 30.67,
+    "location": {
+      "lat": 9.49838248307309,
+      "lng": 76.34733202067909
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:34:07.222Z",
+    "_id": "1758119647222"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 7.75,
+    "turbidity": 15.97,
+    "tds": 308,
+    "temperature": 32.44,
+    "location": {
+      "lat": 25.428172697348177,
+      "lng": 81.8785574308696
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:34:10.225Z",
+    "_id": "1758119650225"
+  },
+  {
+    "deviceId": "device_3",
+    "pH": 7.71,
+    "turbidity": 11.4,
+    "tds": 814,
+    "temperature": 23.94,
+    "location": {
+      "lat": 26.76438890586821,
+      "lng": 92.09425899720455
+    },
+    "source": "Brahmaputra",
+    "region": "Assam",
+    "type": "river",
+    "timestamp": "2025-09-17T14:34:13.234Z",
+    "_id": "1758119653234"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 8.49,
+    "turbidity": 32.61,
+    "tds": 935,
+    "temperature": 28.61,
+    "location": {
+      "lat": 28.612508149070575,
+      "lng": 77.21262616615972
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:34:16.236Z",
+    "_id": "1758119656236"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 8.04,
+    "turbidity": 28.37,
+    "tds": 663,
+    "temperature": 22.16,
+    "location": {
+      "lat": 25.414922058181823,
+      "lng": 81.88386541378884
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:34:19.246Z",
+    "_id": "1758119659246"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 8.43,
+    "turbidity": 31.48,
+    "tds": 314,
+    "temperature": 29.37,
+    "location": {
+      "lat": 28.609631102737396,
+      "lng": 77.21158515707818
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:34:22.243Z",
+    "_id": "1758119662243"
+  },
+  {
+    "deviceId": "device_3",
+    "pH": 7.62,
+    "turbidity": 24.5,
+    "tds": 568,
+    "temperature": 33.38,
+    "location": {
+      "lat": 26.763966344826866,
+      "lng": 92.09495643978924
+    },
+    "source": "Brahmaputra",
+    "region": "Assam",
+    "type": "river",
+    "timestamp": "2025-09-17T14:34:25.249Z",
+    "_id": "1758119665249"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 7.76,
+    "turbidity": 12.46,
+    "tds": 644,
+    "temperature": 24.42,
+    "location": {
+      "lat": 25.414347230918096,
+      "lng": 81.88831683378999
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:34:28.254Z",
+    "_id": "1758119668254"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 7,
+    "turbidity": 38.37,
+    "tds": 541,
+    "temperature": 31.6,
+    "location": {
+      "lat": 12.964744091095623,
+      "lng": 77.5959343751128
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:34:31.266Z",
+    "_id": "1758119671266"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 7.17,
+    "turbidity": 18.07,
+    "tds": 493,
+    "temperature": 34.6,
+    "location": {
+      "lat": 28.610719157275945,
+      "lng": 77.20133922648834
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:34:34.277Z",
+    "_id": "1758119674277"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 6.94,
+    "turbidity": 30.48,
+    "tds": 617,
+    "temperature": 24.56,
+    "location": {
+      "lat": 9.497102975225928,
+      "lng": 76.33000974348519
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:34:37.287Z",
+    "_id": "1758119677287"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 8.35,
+    "turbidity": 39.56,
+    "tds": 923,
+    "temperature": 33.35,
+    "location": {
+      "lat": 25.31944977020313,
+      "lng": 82.99782835670808
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:34:40.293Z",
+    "_id": "1758119680293"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 8.79,
+    "turbidity": 26.6,
+    "tds": 438,
+    "temperature": 25.5,
+    "location": {
+      "lat": 28.615222633113653,
+      "lng": 77.20691395344247
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:34:43.302Z",
+    "_id": "1758119683302"
+  },
+  {
+    "deviceId": "device_4",
+    "pH": 8.65,
+    "turbidity": 16.38,
+    "tds": 962,
+    "temperature": 22.14,
+    "location": {
+      "lat": 13.08764336730579,
+      "lng": 80.26570986304095
+    },
+    "source": "Chennai Water Supply",
+    "region": "Tamil Nadu",
+    "type": "reservoir",
+    "timestamp": "2025-09-17T14:34:46.311Z",
+    "_id": "1758119686311"
+  },
+  {
+    "deviceId": "device_3",
+    "pH": 8.98,
+    "turbidity": 11.25,
+    "tds": 381,
+    "temperature": 30.15,
+    "location": {
+      "lat": 26.761925749649578,
+      "lng": 92.10316900409968
+    },
+    "source": "Brahmaputra",
+    "region": "Assam",
+    "type": "river",
+    "timestamp": "2025-09-17T14:34:49.313Z",
+    "_id": "1758119689313"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 7.86,
+    "turbidity": 23.11,
+    "tds": 961,
+    "temperature": 25.56,
+    "location": {
+      "lat": 19.083664383844532,
+      "lng": 72.88102939884038
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:34:52.314Z",
+    "_id": "1758119692314"
+  },
+  {
+    "deviceId": "device_3",
+    "pH": 7.77,
+    "turbidity": 18.43,
+    "tds": 633,
+    "temperature": 25.96,
+    "location": {
+      "lat": 26.766188712244098,
+      "lng": 92.10629997598419
+    },
+    "source": "Brahmaputra",
+    "region": "Assam",
+    "type": "river",
+    "timestamp": "2025-09-17T14:34:55.317Z",
+    "_id": "1758119695317"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 8.64,
+    "turbidity": 16.6,
+    "tds": 375,
+    "temperature": 23.89,
+    "location": {
+      "lat": 12.964450523764716,
+      "lng": 77.60050099973226
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:34:58.330Z",
+    "_id": "1758119698330"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 6.36,
+    "turbidity": 21.47,
+    "tds": 921,
+    "temperature": 23.61,
+    "location": {
+      "lat": 25.32051558127111,
+      "lng": 83.00956868307986
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:35:01.342Z",
+    "_id": "1758119701342"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 6.99,
+    "turbidity": 30.76,
+    "tds": 951,
+    "temperature": 23.78,
+    "location": {
+      "lat": 12.976302831923658,
+      "lng": 77.58722569871937
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:35:04.347Z",
+    "_id": "1758119704347"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 7,
+    "turbidity": 15.51,
+    "tds": 529,
+    "temperature": 30.36,
+    "location": {
+      "lat": 9.492264154552197,
+      "lng": 76.33036404869246
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:35:07.357Z",
+    "_id": "1758119707357"
+  },
+  {
+    "deviceId": "device_3",
+    "pH": 7.88,
+    "turbidity": 23.38,
+    "tds": 644,
+    "temperature": 33.53,
+    "location": {
+      "lat": 26.751840624597545,
+      "lng": 92.10048589663808
+    },
+    "source": "Brahmaputra",
+    "region": "Assam",
+    "type": "river",
+    "timestamp": "2025-09-17T14:35:10.373Z",
+    "_id": "1758119710373"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 8.29,
+    "turbidity": 24.48,
+    "tds": 744,
+    "temperature": 29.73,
+    "location": {
+      "lat": 25.325235715976515,
+      "lng": 83.01140932527689
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:35:13.376Z",
+    "_id": "1758119713376"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 7.42,
+    "turbidity": 35.55,
+    "tds": 670,
+    "temperature": 28.95,
+    "location": {
+      "lat": 25.31014797934289,
+      "lng": 83.0021871978465
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:35:16.386Z",
+    "_id": "1758119716386"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 6.34,
+    "turbidity": 18.45,
+    "tds": 935,
+    "temperature": 23.41,
+    "location": {
+      "lat": 28.614832981950794,
+      "lng": 77.2097071595716
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:35:19.394Z",
+    "_id": "1758119719394"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 6.41,
+    "turbidity": 17.57,
+    "tds": 426,
+    "temperature": 23.75,
+    "location": {
+      "lat": 25.322787535764615,
+      "lng": 83.00588149392851
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:35:22.407Z",
+    "_id": "1758119722407"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 7.46,
+    "turbidity": 26.92,
+    "tds": 334,
+    "temperature": 30.41,
+    "location": {
+      "lat": 9.501863540564447,
+      "lng": 76.33925813445322
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:35:25.414Z",
+    "_id": "1758119725414"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 6.46,
+    "turbidity": 39.18,
+    "tds": 350,
+    "temperature": 32.62,
+    "location": {
+      "lat": 25.32181434056682,
+      "lng": 83.01416468120723
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:35:28.420Z",
+    "_id": "1758119728420"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 7.45,
+    "turbidity": 14,
+    "tds": 516,
+    "temperature": 25.13,
+    "location": {
+      "lat": 9.505400181379743,
+      "lng": 76.34343940189792
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:35:31.422Z",
+    "_id": "1758119731423"
+  },
+  {
+    "deviceId": "device_4",
+    "pH": 7.4,
+    "turbidity": 19.32,
+    "tds": 660,
+    "temperature": 33.32,
+    "location": {
+      "lat": 13.085760366256554,
+      "lng": 80.27936363684215
+    },
+    "source": "Chennai Water Supply",
+    "region": "Tamil Nadu",
+    "type": "reservoir",
+    "timestamp": "2025-09-17T14:35:34.425Z",
+    "_id": "1758119734425"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 6.92,
+    "turbidity": 39.23,
+    "tds": 750,
+    "temperature": 34.38,
+    "location": {
+      "lat": 28.623054094061583,
+      "lng": 77.21527861216698
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:35:37.427Z",
+    "_id": "1758119737427"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 6.19,
+    "turbidity": 15.77,
+    "tds": 964,
+    "temperature": 21.13,
+    "location": {
+      "lat": 25.323780669012752,
+      "lng": 83.00035704673584
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:35:40.445Z",
+    "_id": "1758119740445"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 8.74,
+    "turbidity": 36.05,
+    "tds": 318,
+    "temperature": 26.05,
+    "location": {
+      "lat": 28.621315904757097,
+      "lng": 77.20620666861056
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:35:43.458Z",
+    "_id": "1758119743458"
+  },
+  {
+    "deviceId": "device_4",
+    "pH": 6.27,
+    "turbidity": 20.38,
+    "tds": 632,
+    "temperature": 24.59,
+    "location": {
+      "lat": 13.077962601574518,
+      "lng": 80.27342376939464
+    },
+    "source": "Chennai Water Supply",
+    "region": "Tamil Nadu",
+    "type": "reservoir",
+    "timestamp": "2025-09-17T14:35:46.464Z",
+    "_id": "1758119746464"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 8.55,
+    "turbidity": 39.76,
+    "tds": 746,
+    "temperature": 27.67,
+    "location": {
+      "lat": 19.070592016819763,
+      "lng": 72.86937401952031
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:35:49.474Z",
+    "_id": "1758119749474"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 7.53,
+    "turbidity": 12.71,
+    "tds": 820,
+    "temperature": 31.76,
+    "location": {
+      "lat": 12.97625298447423,
+      "lng": 77.59035505072814
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:35:52.480Z",
+    "_id": "1758119752480"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 8.05,
+    "turbidity": 31.84,
+    "tds": 890,
+    "temperature": 28.45,
+    "location": {
+      "lat": 12.972544958576602,
+      "lng": 77.59495217427484
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:35:55.490Z",
+    "_id": "1758119755490"
+  },
+  {
+    "deviceId": "device_4",
+    "pH": 6.32,
+    "turbidity": 19.52,
+    "tds": 507,
+    "temperature": 31.61,
+    "location": {
+      "lat": 13.084868751483597,
+      "lng": 80.27599268889112
+    },
+    "source": "Chennai Water Supply",
+    "region": "Tamil Nadu",
+    "type": "reservoir",
+    "timestamp": "2025-09-17T14:35:58.494Z",
+    "_id": "1758119758494"
+  },
+  {
+    "deviceId": "device_4",
+    "pH": 7.16,
+    "turbidity": 35.27,
+    "tds": 416,
+    "temperature": 33.78,
+    "location": {
+      "lat": 13.089797639436043,
+      "lng": 80.27987702619552
+    },
+    "source": "Chennai Water Supply",
+    "region": "Tamil Nadu",
+    "type": "reservoir",
+    "timestamp": "2025-09-17T14:36:01.493Z",
+    "_id": "1758119761493"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 6.32,
+    "turbidity": 37.9,
+    "tds": 674,
+    "temperature": 23.95,
+    "location": {
+      "lat": 19.075925296110647,
+      "lng": 72.88732734646571
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:36:04.498Z",
+    "_id": "1758119764498"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 6.86,
+    "turbidity": 22.81,
+    "tds": 317,
+    "temperature": 32,
+    "location": {
+      "lat": 25.425428680264826,
+      "lng": 81.88098904017
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:36:07.501Z",
+    "_id": "1758119767501"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 6.97,
+    "turbidity": 17.76,
+    "tds": 704,
+    "temperature": 29.96,
+    "location": {
+      "lat": 12.977843473769044,
+      "lng": 77.5892832999397
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:36:10.508Z",
+    "_id": "1758119770508"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 7.17,
+    "turbidity": 31.8,
+    "tds": 685,
+    "temperature": 22.51,
+    "location": {
+      "lat": 25.4298837231421,
+      "lng": 81.88547460968587
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:36:13.520Z",
+    "_id": "1758119773520"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 7.27,
+    "turbidity": 39.24,
+    "tds": 311,
+    "temperature": 34.98,
+    "location": {
+      "lat": 28.60876438367811,
+      "lng": 77.20455494672551
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:36:16.532Z",
+    "_id": "1758119776532"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 8.53,
+    "turbidity": 20.12,
+    "tds": 319,
+    "temperature": 32.35,
+    "location": {
+      "lat": 19.070301535553842,
+      "lng": 72.87091739387601
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:36:19.546Z",
+    "_id": "1758119779546"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 7.9,
+    "turbidity": 33.56,
+    "tds": 806,
+    "temperature": 30.35,
+    "location": {
+      "lat": 28.611504903641396,
+      "lng": 77.21463188100199
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:36:22.556Z",
+    "_id": "1758119782556"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 7.73,
+    "turbidity": 13.78,
+    "tds": 587,
+    "temperature": 21.48,
+    "location": {
+      "lat": 28.608553063560546,
+      "lng": 77.2162229719045
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:36:25.561Z",
+    "_id": "1758119785561"
+  },
+  {
+    "deviceId": "device_3",
+    "pH": 6.87,
+    "turbidity": 25.03,
+    "tds": 459,
+    "temperature": 25.02,
+    "location": {
+      "lat": 26.748349466107594,
+      "lng": 92.1100901289435
+    },
+    "source": "Brahmaputra",
+    "region": "Assam",
+    "type": "river",
+    "timestamp": "2025-09-17T14:36:28.566Z",
+    "_id": "1758119788566"
+  },
+  {
+    "deviceId": "device_4",
+    "pH": 6.24,
+    "turbidity": 34.07,
+    "tds": 998,
+    "temperature": 25.33,
+    "location": {
+      "lat": 13.076039710831974,
+      "lng": 80.27434891975221
+    },
+    "source": "Chennai Water Supply",
+    "region": "Tamil Nadu",
+    "type": "reservoir",
+    "timestamp": "2025-09-17T14:36:31.579Z",
+    "_id": "1758119791579"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 7.45,
+    "turbidity": 37.23,
+    "tds": 669,
+    "temperature": 23.85,
+    "location": {
+      "lat": 9.495288769977359,
+      "lng": 76.33357501184446
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:36:34.594Z",
+    "_id": "1758119794594"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 8.78,
+    "turbidity": 13.97,
+    "tds": 551,
+    "temperature": 34.71,
+    "location": {
+      "lat": 19.068760919486284,
+      "lng": 72.88628957817505
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:36:37.595Z",
+    "_id": "1758119797595"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 6.05,
+    "turbidity": 27.7,
+    "tds": 758,
+    "temperature": 27.93,
+    "location": {
+      "lat": 9.499611726700078,
+      "lng": 76.33524348925388
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:36:40.602Z",
+    "_id": "1758119800602"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 6.48,
+    "turbidity": 22.77,
+    "tds": 720,
+    "temperature": 31.07,
+    "location": {
+      "lat": 28.606361834363764,
+      "lng": 77.20901440319571
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:36:43.603Z",
+    "_id": "1758119803603"
+  },
+  {
+    "deviceId": "device_3",
+    "pH": 8.4,
+    "turbidity": 11.06,
+    "tds": 829,
+    "temperature": 22.68,
+    "location": {
+      "lat": 26.75615813343745,
+      "lng": 92.10711265861406
+    },
+    "source": "Brahmaputra",
+    "region": "Assam",
+    "type": "river",
+    "timestamp": "2025-09-17T14:36:46.616Z",
+    "_id": "1758119806616"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 6.32,
+    "turbidity": 23.01,
+    "tds": 826,
+    "temperature": 22.74,
+    "location": {
+      "lat": 28.621379690256994,
+      "lng": 77.21758371761304
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:36:49.621Z",
+    "_id": "1758119809621"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 7.11,
+    "turbidity": 11.85,
+    "tds": 438,
+    "temperature": 24.71,
+    "location": {
+      "lat": 25.431684216023957,
+      "lng": 81.88814321550609
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:36:52.625Z",
+    "_id": "1758119812625"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 8,
+    "turbidity": 31.58,
+    "tds": 636,
+    "temperature": 34.88,
+    "location": {
+      "lat": 25.41719665471716,
+      "lng": 81.88871746868658
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:36:55.630Z",
+    "_id": "1758119815630"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 8.61,
+    "turbidity": 16,
+    "tds": 804,
+    "temperature": 34.66,
+    "location": {
+      "lat": 9.489765580589317,
+      "lng": 76.34460144916892
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:36:58.637Z",
+    "_id": "1758119818637"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 6.72,
+    "turbidity": 22.32,
+    "tds": 795,
+    "temperature": 25.25,
+    "location": {
+      "lat": 25.41622962792518,
+      "lng": 81.88117053604037
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:01.641Z",
+    "_id": "1758119821641"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 8.75,
+    "turbidity": 27.28,
+    "tds": 484,
+    "temperature": 22.05,
+    "location": {
+      "lat": 28.608937673873633,
+      "lng": 77.21562805488578
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:37:04.654Z",
+    "_id": "1758119824654"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 6.81,
+    "turbidity": 39.61,
+    "tds": 364,
+    "temperature": 34.32,
+    "location": {
+      "lat": 25.32033783243531,
+      "lng": 83.00083274070776
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:07.656Z",
+    "_id": "1758119827656"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 8.91,
+    "turbidity": 36.56,
+    "tds": 935,
+    "temperature": 22.11,
+    "location": {
+      "lat": 28.623760532834126,
+      "lng": 77.20331472997158
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:37:10.662Z",
+    "_id": "1758119830663"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 6.43,
+    "turbidity": 17.84,
+    "tds": 338,
+    "temperature": 20.04,
+    "location": {
+      "lat": 25.311483229918114,
+      "lng": 83.01393276060081
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:13.668Z",
+    "_id": "1758119833668"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 8.65,
+    "turbidity": 24.02,
+    "tds": 932,
+    "temperature": 27.88,
+    "location": {
+      "lat": 19.069639014847155,
+      "lng": 72.86774900135792
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:37:16.675Z",
+    "_id": "1758119836675"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 7.86,
+    "turbidity": 19.4,
+    "tds": 730,
+    "temperature": 21.56,
+    "location": {
+      "lat": 25.420428974437165,
+      "lng": 81.88350738548671
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:19.680Z",
+    "_id": "1758119839680"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 6.16,
+    "turbidity": 14.09,
+    "tds": 502,
+    "temperature": 20.17,
+    "location": {
+      "lat": 19.085719774599315,
+      "lng": 72.88325626446066
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:37:22.692Z",
+    "_id": "1758119842692"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 6.53,
+    "turbidity": 24.92,
+    "tds": 784,
+    "temperature": 23.21,
+    "location": {
+      "lat": 25.317632085556124,
+      "lng": 83.00241968454765
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:25.704Z",
+    "_id": "1758119845704"
+  },
+  {
+    "deviceId": "device_6",
+    "pH": 6.91,
+    "turbidity": 35.33,
+    "tds": 996,
+    "temperature": 23.19,
+    "location": {
+      "lat": 19.06877720717742,
+      "lng": 72.87751402494304
+    },
+    "source": "Mumbai Water Works",
+    "region": "Maharashtra",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:37:28.707Z",
+    "_id": "1758119848707"
+  },
+  {
+    "deviceId": "device_4",
+    "pH": 8.99,
+    "turbidity": 37.58,
+    "tds": 409,
+    "temperature": 27.51,
+    "location": {
+      "lat": 13.090166999798065,
+      "lng": 80.27572154975906
+    },
+    "source": "Chennai Water Supply",
+    "region": "Tamil Nadu",
+    "type": "reservoir",
+    "timestamp": "2025-09-17T14:37:31.720Z",
+    "_id": "1758119851720"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 8.85,
+    "turbidity": 32.78,
+    "tds": 942,
+    "temperature": 25.69,
+    "location": {
+      "lat": 12.96906182925836,
+      "lng": 77.59490805764233
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:37:34.723Z",
+    "_id": "1758119854723"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 6.34,
+    "turbidity": 18.36,
+    "tds": 596,
+    "temperature": 22.67,
+    "location": {
+      "lat": 12.980440482419004,
+      "lng": 77.59029996256663
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:37:37.723Z",
+    "_id": "1758119857723"
+  },
+  {
+    "deviceId": "device_1",
+    "pH": 6.95,
+    "turbidity": 26.85,
+    "tds": 411,
+    "temperature": 24.33,
+    "location": {
+      "lat": 25.312686645941074,
+      "lng": 83.00181572109001
+    },
+    "source": "Ganges River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:40.738Z",
+    "_id": "1758119860738"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 7.75,
+    "turbidity": 11.27,
+    "tds": 777,
+    "temperature": 27.66,
+    "location": {
+      "lat": 28.617405841448623,
+      "lng": 77.21881734473061
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:37:43.739Z",
+    "_id": "1758119863739"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 7.64,
+    "turbidity": 38.59,
+    "tds": 611,
+    "temperature": 23.53,
+    "location": {
+      "lat": 12.967811168011831,
+      "lng": 77.6022630486719
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:37:46.748Z",
+    "_id": "1758119866748"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 7.25,
+    "turbidity": 17.41,
+    "tds": 898,
+    "temperature": 20.03,
+    "location": {
+      "lat": 25.42797936028191,
+      "lng": 81.88914325422547
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:49.760Z",
+    "_id": "1758119869760"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 8.29,
+    "turbidity": 28.45,
+    "tds": 468,
+    "temperature": 31.89,
+    "location": {
+      "lat": 9.497957222358009,
+      "lng": 76.34550039029048
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:37:52.766Z",
+    "_id": "1758119872766"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 8.94,
+    "turbidity": 12.25,
+    "tds": 818,
+    "temperature": 33.98,
+    "location": {
+      "lat": 12.963967957188428,
+      "lng": 77.58522772744156
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:37:55.777Z",
+    "_id": "1758119875777"
+  },
+  {
+    "deviceId": "device_2",
+    "pH": 6.73,
+    "turbidity": 36.82,
+    "tds": 431,
+    "temperature": 27.45,
+    "location": {
+      "lat": 25.417674914398876,
+      "lng": 81.8791482099891
+    },
+    "source": "Yamuna River",
+    "region": "Uttar Pradesh",
+    "type": "river",
+    "timestamp": "2025-09-17T14:37:58.789Z",
+    "_id": "1758119878789"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 6.04,
+    "turbidity": 20.49,
+    "tds": 886,
+    "temperature": 21.07,
+    "location": {
+      "lat": 28.60884265122533,
+      "lng": 77.21238508015823
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:38:01.796Z",
+    "_id": "1758119881796"
+  },
+  {
+    "deviceId": "device_8",
+    "pH": 6.49,
+    "turbidity": 32.69,
+    "tds": 776,
+    "temperature": 27.33,
+    "location": {
+      "lat": 28.604554798302168,
+      "lng": 77.20369430991897
+    },
+    "source": "Delhi Jal Board",
+    "region": "Delhi",
+    "type": "treatment",
+    "timestamp": "2025-09-17T14:38:04.804Z",
+    "_id": "1758119884804"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 7.97,
+    "turbidity": 16.56,
+    "tds": 859,
+    "temperature": 25.34,
+    "location": {
+      "lat": 9.490967698865996,
+      "lng": 76.33587385097742
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:38:07.816Z",
+    "_id": "1758119887816"
+  },
+  {
+    "deviceId": "device_7",
+    "pH": 8.6,
+    "turbidity": 12.75,
+    "tds": 759,
+    "temperature": 33.94,
+    "location": {
+      "lat": 9.501173785265934,
+      "lng": 76.34208564614565
+    },
+    "source": "Kerala Backwaters",
+    "region": "Kerala",
+    "type": "backwater",
+    "timestamp": "2025-09-17T14:38:10.824Z",
+    "_id": "1758119890824"
+  },
+  {
+    "deviceId": "device_5",
+    "pH": 6.25,
+    "turbidity": 21.58,
+    "tds": 718,
+    "temperature": 33.48,
+    "location": {
+      "lat": 12.976282593606054,
+      "lng": 77.58745445565931
+    },
+    "source": "Bangalore Lakes",
+    "region": "Karnataka",
+    "type": "lake",
+    "timestamp": "2025-09-17T14:38:13.832Z",
+    "_id": "1758119893832"
+  }
+]

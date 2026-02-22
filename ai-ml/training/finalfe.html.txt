@@ -1,0 +1,2486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaveGenix - Water Quality Monitoring Dashboard</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-card: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #10b981;
+            --accent-danger: #ef4444;
+            --accent-warning: #f59e0b;
+            --shadow: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border-color: #334155;
+            --shadow: 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: var(--bg-card);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            transition: background 0.3s, border-color 0.3s;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--accent-primary);
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item {
+            padding: 12px 16px;
+            margin: 8px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            background: var(--bg-secondary);
+            color: var(--accent-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 20px;
+        }
+
+        .top-bar {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            transition: background 0.3s, box-shadow 0.3s;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .language-selector, .theme-toggle {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .language-selector:hover, .theme-toggle:hover {
+            border-color: var(--accent-primary);
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .stat-unit {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        #mapContainer {
+            height: 500px;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .map-controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            background: var(--accent-primary);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--accent-secondary);
+        }
+
+        .btn-danger {
+            background: var(--accent-danger);
+        }
+
+        .btn-warning {
+            background: var(--accent-warning);
+        }
+
+        .alerts-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .alert-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-danger);
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+        }
+
+        .alert-card:hover {
+            transform: translateX(5px);
+        }
+
+        .alert-card.warning {
+            border-left-color: var(--accent-warning);
+        }
+
+        .alert-card.info {
+            border-left-color: var(--accent-primary);
+        }
+
+        .quiz-container {
+            background: var(--bg-card);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .quiz-question {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .quiz-option {
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quiz-option:hover {
+            border-color: var(--accent-primary);
+            transform: translateX(5px);
+        }
+
+        .quiz-option.correct {
+            background: #10b98144;
+            border-color: var(--accent-secondary);
+        }
+
+        .quiz-option.incorrect {
+            background: #ef444444;
+            border-color: var(--accent-danger);
+        }
+
+        .quiz-explanation {
+            margin-top: 15px;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-warning);
+            display: none;
+        }
+
+        .quiz-explanation.show {
+            display: block;
+        }
+
+        .quiz-score {
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+            color: var(--accent-primary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent-primary);
+            transition: width 0.3s;
+        }
+
+        .education-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .education-tab {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            background: var(--bg-card);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .education-tab.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .education-content {
+            display: none;
+        }
+
+        .education-content.active {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .resource-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .resource-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .resource-content {
+            padding: 20px;
+        }
+
+        .resource-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .resource-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .video-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .video-modal.active {
+            display: flex;
+        }
+
+        .video-modal-content {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 900px;
+            width: 90%;
+        }
+
+        .video-modal-close {
+            float: right;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-primary);
+        }
+
+        .video-frame {
+            width: 100%;
+            height: 500px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .chart-container {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .health-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+
+        .health-card {
+            background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s;
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .health-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .health-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .health-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--accent-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .health-title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: var(--text-primary);
+        }
+
+        .health-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .health-tips {
+            list-style: none;
+            padding: 0;
+        }
+
+        .health-tips li {
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .health-tips li:last-child {
+            border-bottom: none;
+        }
+
+        .health-tips li::before {
+            content: '✓';
+            color: var(--accent-secondary);
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .village-heads-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .village-head-card {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .village-head-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .village-head-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--accent-primary);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            color: white;
+        }
+
+        .water-body-info {
+            background: var(--bg-card);
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .water-body-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .water-body-card {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+        }
+
+        /* Reports & Complaints Section Styles */
+        .reports-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+        }
+
+        .report-form-container, .complaints-list-container {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .form-submit:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .complaints-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .complaints-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .complaint-card {
+            background: var(--bg-secondary);
+            padding: 18px;
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-warning);
+            transition: all 0.3s;
+        }
+
+        .complaint-card:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow);
+        }
+
+        .complaint-card.resolved {
+            border-left-color: var(--accent-secondary);
+            opacity: 0.8;
+        }
+
+        .complaint-card.critical {
+            border-left-color: var(--accent-danger);
+        }
+
+        .complaint-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .complaint-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .complaint-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .complaint-description {
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .complaint-status {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .status-in-progress {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .status-resolved {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .complaint-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .resolve-btn {
+            background: var(--accent-secondary);
+            color: white;
+        }
+
+        .delete-btn {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 1024px) {
+            .reports-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                position: relative;
+                height: auto;
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .complaint-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <div class="logo">
+                <span>💧</span>
+                <span data-translate="appName">WaveGenix</span>
+            </div>
+            <div class="nav-item active" onclick="showSection('dashboard')" data-translate="navDashboard">
+                📊 Dashboard
+            </div>
+            <div class="nav-item" onclick="showSection('mapSection')" data-translate="navMap">
+                🗺️ Village Map
+            </div>
+            <div class="nav-item" onclick="showSection('analytics')" data-translate="navAnalytics">
+                📈 Analytics
+            </div>
+            <div class="nav-item" onclick="showSection('alerts')" data-translate="navAlerts">
+                🔔 Alerts
+            </div>
+            <div class="nav-item" onclick="showSection('game')" data-translate="navGame">
+                🎮 pH Learning Game
+            </div>
+            <div class="nav-item" onclick="showSection('villageHeads')" data-translate="navVillageHeads">
+                👥 Village Heads
+            </div>
+            <div class="nav-item" onclick="showSection('education')" data-translate="navEducation">
+                📚 Education Hub
+            </div>
+            <div class="nav-item" onclick="showSection('health')" data-translate="navHealth">
+                🏥 Health Resources
+            </div>
+            <div class="nav-item" onclick="showSection('reports')" data-translate="navReports">
+                📝 Reports & Complaints
+            </div>
+            <div class="nav-item" onclick="showSection('settings')" data-translate="navSettings">
+                ⚙️ Settings
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="top-bar">
+                <h1 data-translate="welcome">Welcome to WaveGenix</h1>
+                <div class="controls">
+                    <select class="language-selector" onchange="changeLanguage(this.value)">
+                        <option value="en">English</option>
+                        <option value="hi">हिंदी</option>
+                        <option value="ta">தமிழ்</option>
+                        <option value="te">తెలుగు</option>
+                        <option value="ml">മലയാളം</option>
+                    </select>
+                    <button class="theme-toggle" onclick="toggleTheme()">
+                        <span id="themeIcon">🌙</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label" data-translate="phLevel">pH Level</div>
+                        <div class="stat-value">7.2 <span class="stat-unit">pH</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label" data-translate="tdsLevel">TDS Level</div>
+                        <div class="stat-value">320 <span class="stat-unit">ppm</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label" data-translate="temperature">Temperature</div>
+                        <div class="stat-value">24 <span class="stat-unit">°C</span></div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label" data-translate="waterQuality">Water Quality</div>
+                        <div class="stat-value" style="color: var(--accent-secondary);" data-translate="good">Good</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="dashboardChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Village Map Section -->
+            <div id="mapSection" class="content-section">
+                <div class="map-controls">
+                    <button class="btn" onclick="getMyLocation()" data-translate="getLocation">📍 Get My Location</button>
+                    <button class="btn btn-secondary" onclick="findWaterBodies()" data-translate="findWaterBodies">💧 Find Water Bodies</button>
+                    <button class="btn btn-warning" onclick="clearWaterBodies()" data-translate="clearWaterBodies">🗑️ Clear Water Bodies</button>
+                </div>
+                <div id="mapContainer"></div>
+                
+                <div class="water-body-info" id="waterBodyInfo" style="display: none;">
+                    <h3 data-translate="nearbyWaterBodies">Nearby Water Bodies</h3>
+                    <div class="water-body-grid" id="waterBodyGrid"></div>
+                </div>
+            </div>
+
+            <!-- Analytics Section -->
+            <div id="analytics" class="content-section">
+                <div class="chart-container">
+                    <h3 data-translate="weeklyTrend">Weekly Water Quality Trend</h3>
+                    <canvas id="analyticsChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3 data-translate="villageComparison">Village Comparison</h3>
+                    <canvas id="comparisonChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Alerts Section -->
+            <div id="alerts" class="content-section">
+                <div class="alerts-container">
+                    <div class="alert-card">
+                        <h3 data-translate="criticalAlert">🚨 Critical Alert</h3>
+                        <p data-translate="alertMsg1">High TDS detected in Village A - Immediate action required</p>
+                        <small>2 hours ago</small>
+                    </div>
+                    <div class="alert-card warning">
+                        <h3 data-translate="warningAlert">⚠️ Warning</h3>
+                        <p data-translate="alertMsg2">pH levels approaching unsafe range in Village B</p>
+                        <small>5 hours ago</small>
+                    </div>
+                    <div class="alert-card info">
+                        <h3 data-translate="infoAlert">ℹ️ Information</h3>
+                        <p data-translate="alertMsg3">Scheduled maintenance for sensors in Village C tomorrow</p>
+                        <small>1 day ago</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- pH Learning Game Section -->
+            <div id="game" class="content-section">
+                <div class="quiz-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="quiz-score" id="quizScore">Score: 0 / 0</div>
+                    <div class="quiz-question" id="quizQuestion"></div>
+                    <div class="quiz-options" id="quizOptions"></div>
+                    <div class="quiz-explanation" id="quizExplanation"></div>
+                    <button class="btn" id="nextBtn" onclick="nextQuestion()" style="margin-top: 20px; display: none;" data-translate="nextQuestion">Next Question</button>
+                    <button class="btn btn-secondary" id="restartBtn" onclick="restartQuiz()" style="margin-top: 20px; display: none;" data-translate="restartQuiz">Restart Quiz</button>
+                </div>
+            </div>
+
+            <!-- Village Heads Section -->
+            <div id="villageHeads" class="content-section">
+                <div class="village-heads-grid" id="villageHeadsGrid"></div>
+            </div>
+
+            <!-- Education Hub Section -->
+            <div id="education" class="content-section">
+                <div class="education-tabs">
+                    <div class="education-tab active" onclick="showEducationTab('videos')" data-translate="awarenessVideos">
+                        🎥 Awareness Videos
+                    </div>
+                    <div class="education-tab" onclick="showEducationTab('infographics')" data-translate="infographics">
+                        📊 Infographics
+                    </div>
+                    <div class="education-tab" onclick="showEducationTab('resources')" data-translate="learningResources">
+                        📖 Learning Resources
+                    </div>
+                    <div class="education-tab" onclick="showEducationTab('updates')" data-translate="latestUpdates">
+                        📰 Latest Updates
+                    </div>
+                </div>
+
+                <div id="videos" class="education-content active"></div>
+                <div id="infographics" class="education-content"></div>
+                <div id="resources" class="education-content"></div>
+                <div id="updates" class="education-content"></div>
+            </div>
+
+            <!-- Health Resources Section -->
+            <div id="health" class="content-section">
+                <div class="health-grid" id="healthGrid"></div>
+            </div>
+
+            <!-- Reports & Complaints Section -->
+            <div id="reports" class="content-section">
+                <div class="reports-container">
+                    <!-- Report Form -->
+                    <div class="report-form-container">
+                        <h2>📝 Submit Water Issue Report</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 20px;">Report water quality issues, contamination, or infrastructure problems in your area.</p>
+                        
+                        <form id="reportForm">
+                            <div class="form-group">
+                                <label class="form-label" for="issueType">Issue Type</label>
+                                <select class="form-select" id="issueType" required>
+                                    <option value="">Select issue type</option>
+                                    <option value="water_quality">Water Quality Problem</option>
+                                    <option value="contamination">Water Contamination</option>
+                                    <option value="infrastructure">Infrastructure Issue</option>
+                                    <option value="supply">Water Supply Problem</option>
+                                    <option value="other">Other Issue</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="location">Location/Village</label>
+                                <input type="text" class="form-input" id="location" placeholder="Enter your village or location" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="description">Issue Description</label>
+                                <textarea class="form-textarea" id="description" placeholder="Please describe the issue in detail..." required></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="priority">Priority Level</label>
+                                <select class="form-select" id="priority" required>
+                                    <option value="low">Low Priority</option>
+                                    <option value="medium" selected>Medium Priority</option>
+                                    <option value="high">High Priority</option>
+                                    <option value="critical">Critical Emergency</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label" for="contact">Contact Information (Optional)</label>
+                                <input type="text" class="form-input" id="contact" placeholder="Phone number or email">
+                            </div>
+                            
+                            <button type="submit" class="form-submit">Submit Report</button>
+                        </form>
+                    </div>
+                    
+                    <!-- Complaints List -->
+                    <div class="complaints-list-container">
+                        <div class="complaints-header">
+                            <h2>📋 Recent Reports & Complaints</h2>
+                            <button class="btn btn-secondary" onclick="refreshComplaints()">🔄 Refresh</button>
+                        </div>
+                        
+                        <div class="complaints-list" id="complaintsList">
+                            <!-- Complaints will be dynamically loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Section -->
+            <div id="settings" class="content-section">
+                <div class="stat-card">
+                    <h3 data-translate="settingsTitle">Settings</h3>
+                    <p data-translate="settingsDesc">Configure your dashboard preferences</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Modal -->
+    <div class="video-modal" id="videoModal">
+        <div class="video-modal-content">
+            <span class="video-modal-close" onclick="closeVideoModal()">&times;</span>
+            <h2 id="videoTitle"></h2>
+            <iframe id="videoFrame" class="video-frame" frameborder="0" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced translations with Reports & Complaints
+        const translations = {
+            en: {
+                appName: "WaveGenix",
+                welcome: "Welcome to WaveGenix",
+                navDashboard: "📊 Dashboard",
+                navMap: "🗺️ Village Map",
+                navAnalytics: "📈 Analytics",
+                navAlerts: "🔔 Alerts",
+                navGame: "🎮 pH Learning Game",
+                navVillageHeads: "👥 Village Heads",
+                navEducation: "📚 Education Hub",
+                navHealth: "🏥 Health Resources",
+                navReports: "📝 Reports & Complaints",
+                navSettings: "⚙️ Settings",
+                phLevel: "pH Level",
+                tdsLevel: "TDS Level",
+                temperature: "Temperature",
+                waterQuality: "Water Quality",
+                good: "Good",
+                getLocation: "📍 Get My Location",
+                findWaterBodies: "💧 Find Water Bodies",
+                clearWaterBodies: "🗑️ Clear Water Bodies",
+                nearbyWaterBodies: "Nearby Water Bodies",
+                weeklyTrend: "Weekly Water Quality Trend",
+                villageComparison: "Village Comparison",
+                criticalAlert: "🚨 Critical Alert",
+                warningAlert: "⚠️ Warning",
+                infoAlert: "ℹ️ Information",
+                alertMsg1: "High TDS detected in Village A - Immediate action required",
+                alertMsg2: "pH levels approaching unsafe range in Village B",
+                alertMsg3: "Scheduled maintenance for sensors in Village C tomorrow",
+                nextQuestion: "Next Question",
+                restartQuiz: "Restart Quiz",
+                awarenessVideos: "🎥 Awareness Videos",
+                infographics: "📊 Infographics",
+                learningResources: "📖 Learning Resources",
+                latestUpdates: "📰 Latest Updates",
+                settingsTitle: "Settings",
+                settingsDesc: "Configure your dashboard preferences",
+                searching: "Searching for water bodies...",
+                noWaterBodies: "No water bodies found in your area",
+                river: "River",
+                lake: "Lake",
+                pond: "Pond",
+                well: "Well",
+                reservoir: "Reservoir",
+                ph: "pH",
+                turbidity: "Turbidity",
+                quality: "Quality",
+                submitReport: "Submit Report",
+                reportSubmitted: "Report Submitted Successfully",
+                reportError: "Error submitting report",
+                noComplaints: "No complaints found",
+                statusPending: "Pending",
+                statusInProgress: "In Progress",
+                statusResolved: "Resolved",
+                markResolved: "Mark Resolved",
+                deleteReport: "Delete"
+            },
+            hi: {
+                appName: "वेवजेनिक्स",
+                welcome: "वेवजेनिक्स में आपका स्वागत है",
+                navDashboard: "📊 डैशबोर्ड",
+                navMap: "🗺️ गांव का नक्शा",
+                navAnalytics: "📈 विश्लेषण",
+                navAlerts: "🔔 अलर्ट",
+                navGame: "🎮 पीएच सीखने का खेल",
+                navVillageHeads: "👥 गांव के मुखिया",
+                navEducation: "📚 शिक्षा केंद्र",
+                navHealth: "🏥 स्वास्थ्य संसाधन",
+                navReports: "📝 रिपोर्ट और शिकायतें",
+                navSettings: "⚙️ सेटिंग्स",
+                phLevel: "पीएच स्तर",
+                tdsLevel: "टीडीएस स्तर",
+                temperature: "तापमान",
+                waterQuality: "पानी की गुणवत्ता",
+                good: "अच्छा",
+                getLocation: "📍 मेरा स्थान प्राप्त करें",
+                findWaterBodies: "💧 पानी के स्रोत खोजें",
+                clearWaterBodies: "🗑️ पानी के स्रोत हटाएं",
+                nearbyWaterBodies: "आस-पास के पानी के स्रोत",
+                weeklyTrend: "साप्ताहिक जल गुणवत्ता रुझान",
+                villageComparison: "गांव की तुलना",
+                criticalAlert: "🚨 गंभीर चेतावनी",
+                warningAlert: "⚠️ चेतावनी",
+                infoAlert: "ℹ️ जानकारी",
+                alertMsg1: "गांव A में उच्च टीडीएस का पता चला - तत्काल कार्रवाई आवश्यक",
+                alertMsg2: "गांव B में पीएच स्तर असुरक्षित सीमा के करीब पहुंच रहा है",
+                alertMsg3: "कल गांव C में सेंसर के लिए निर्धारित रखरखाव",
+                nextQuestion: "अगला प्रश्न",
+                restartQuiz: "क्विज पुनः आरंभ करें",
+                awarenessVideos: "🎥 जागरूकता वीडियो",
+                infographics: "📊 इन्फोग्राफिक्स",
+                learningResources: "📖 सीखने के संसाधन",
+                latestUpdates: "📰 नवीनतम अपडेट",
+                settingsTitle: "सेटिंग्स",
+                settingsDesc: "अपने डैशबोर्ड प्राथमिकताएं कॉन्फ़िगर करें",
+                searching: "पानी के स्रोत खोज रहे हैं...",
+                noWaterBodies: "आपके क्षेत्र में कोई पानी का स्रोत नहीं मिला",
+                river: "नदी",
+                lake: "झील",
+                pond: "तालाब",
+                well: "कुआं",
+                reservoir: "जलाशय",
+                ph: "पीएच",
+                turbidity: "गंदलापन",
+                quality: "गुणवत्ता",
+                submitReport: "रिपोर्ट सबमिट करें",
+                reportSubmitted: "रिपोर्ट सफलतापूर्वक सबमिट की गई",
+                reportError: "रिपोर्ट सबमिट करने में त्रुटि",
+                noComplaints: "कोई शिकायत नहीं मिली",
+                statusPending: "लंबित",
+                statusInProgress: "प्रगति पर",
+                statusResolved: "हल हो गया",
+                markResolved: "हल किया गया चिह्नित करें",
+                deleteReport: "हटाएं"
+            },
+            ta: {
+                appName: "வேவ்ஜெனிக்ஸ்",
+                welcome: "வேவ்ஜெனிக்ஸ்-க்கு வரவேற்கிறோம்",
+                navDashboard: "📊 டாஷ்போர்டு",
+                navMap: "🗺️ கிராம வரைபடம்",
+                navAnalytics: "📈 பகுப்பாய்வு",
+                navAlerts: "🔔 எச்சரிக்கைகள்",
+                navGame: "🎮 pH கற்றல் விளையாட்டு",
+                navVillageHeads: "👥 கிராம தலைவர்கள்",
+                navEducation: "📚 கல்வி மையம்",
+                navHealth: "🏥 சுகாதார வளங்கள்",
+                navReports: "📝 அறிக்கைகள் மற்றும் புகார்கள்",
+                navSettings: "⚙️ அமைப்புகள்",
+                phLevel: "pH நிலை",
+                tdsLevel: "TDS நிலை",
+                temperature: "வெப்பநிலை",
+                waterQuality: "நீர் தரம்",
+                good: "நல்லது",
+                getLocation: "📍 எனது இருப்பிடத்தைப் பெறுக",
+                findWaterBodies: "💧 நீர் ஆதாரங்களை கண்டறியவும்",
+                clearWaterBodies: "🗑️ நீர் ஆதாரங்களை அழிக்கவும்",
+                nearbyWaterBodies: "அருகிலுள்ள நீர் ஆதாரங்கள்",
+                weeklyTrend: "வாராந்திர நீர் தர போக்கு",
+                villageComparison: "கிராம ஒப்பீடு",
+                criticalAlert: "🚨 முக்கியமான எச்சரிக்கை",
+                warningAlert: "⚠️ எச்சரிக்கை",
+                infoAlert: "ℹ️ தகவல்",
+                alertMsg1: "கிராமம் A இல் அதிக TDS கண்டறியப்பட்டது - உடனடி நடவடிக்கை தேவை",
+                alertMsg2: "கிராமம் B இல் pH நிலைகள் பாதுகாப்பற்ற வரம்பை நெருங்குகின்றன",
+                alertMsg3: "நாளை கிராமம் C இல் சென்சார்களுக்கான திட்டமிடப்பட்ட பராமரிப்பு",
+                nextQuestion: "அடுத்த கேள்வி",
+                restartQuiz: "வினாடி வினாவை மீண்டும் தொடங்கவும்",
+                awarenessVideos: "🎥 விழிப்புணர்வு வீடியோக்கள்",
+                infographics: "📊 இன்போகிராஃபிக்ஸ்",
+                learningResources: "📖 கற்றல் வளங்கள்",
+                latestUpdates: "📰 சமீபத்திய புதுப்பிப்புகள்",
+                settingsTitle: "அமைப்புகள்",
+                settingsDesc: "உங்கள் டாஷ்போர்டு விருப்பங்களை உள்ளமைக்கவும்",
+                searching: "நீர் ஆதாரங்களை தேடுகிறது...",
+                noWaterBodies: "உங்கள் பகுதியில் நீர் ஆதாரங்கள் எதுவும் கிடைக்கவில்லை",
+                river: "ஆறு",
+                lake: "ஏரி",
+                pond: "குளம்",
+                well: "கிணறு",
+                reservoir: "நீர்த்தேக்கம்",
+                ph: "pH",
+                turbidity: "கலங்கல்",
+                quality: "தரம்",
+                submitReport: "அறிக்கை சமர்ப்பிக்கவும்",
+                reportSubmitted: "அறிக்கை வெற்றிகரமாக சமர்ப்பிக்கப்பட்டது",
+                reportError: "அறிக்கை சமர்ப்பிக்கும் போது பிழை",
+                noComplaints: "புகார்கள் எதுவும் கிடைக்கவில்லை",
+                statusPending: "நிலுவையில்",
+                statusInProgress: "செயல்பாட்டில்",
+                statusResolved: "தீர்க்கப்பட்டது",
+                markResolved: "தீர்க்கப்பட்டதாக குறிக்கவும்",
+                deleteReport: "நீக்கு"
+            },
+            te: {
+                appName: "వేవ్‌జెనిక్స్",
+                welcome: "వేవ్‌జెనిక్స్‌కు స్వాగతం",
+                navDashboard: "📊 డాష్‌బోర్డ్",
+                navMap: "🗺️ గ్రామ మ్యాప్",
+                navAnalytics: "📈 విశ్లేషణలు",
+                navAlerts: "🔔 హెచ్చరికలు",
+                navGame: "🎮 pH నేర్చుకునే ఆట",
+                navVillageHeads: "👥 గ్రామ అధిపతులు",
+                navEducation: "📚 విద్యా కేంద్రం",
+                navHealth: "🏥 ఆరోగ్య వనరులు",
+                navReports: "📝 నివేదికలు మరియు ఫిర్యాదులు",
+                navSettings: "⚙️ సెట్టింగ్‌లు",
+                phLevel: "pH స్థాయి",
+                tdsLevel: "TDS స్థాయి",
+                temperature: "ఉష్ణోగ్రత",
+                waterQuality: "నీటి నాణ్యత",
+                good: "మంచిది",
+                getLocation: "📍 నా స్థానాన్ని పొందండి",
+                findWaterBodies: "💧 నీటి వనరులను కనుగొనండి",
+                clearWaterBodies: "🗑️ నీటి వనరులను తొలగించండి",
+                nearbyWaterBodies: "సమీపంలోని నీటి వనరులు",
+                weeklyTrend: "వారపు నీటి నాణ్యత ధోరణి",
+                villageComparison: "గ్రామ పోలిక",
+                criticalAlert: "🚨 క్లిష్టమైన హెచ్చరిక",
+                warningAlert: "⚠️ హెచ్చరిక",
+                infoAlert: "ℹ️ సమాచారం",
+                alertMsg1: "గ్రామం A లో అధిక TDS గుర్తించబడింది - తక్షణ చర్య అవసరం",
+                alertMsg2: "గ్రామం B లో pH స్థాయిలు అసురక్షిత పరిధిని చేరుకుంటున్నాయి",
+                alertMsg3: "రేపు గ్రామం C లో సెన్సార్‌ల కోసం షెడ్యూల్ చేసిన నిర్వహణ",
+                nextQuestion: "తదుపరి ప్రశ్న",
+                restartQuiz: "క్విజ్‌ను పునఃప్రారంభించండి",
+                awarenessVideos: "🎥 అవగాహన వీడియోలు",
+                infographics: "📊 ఇన్ఫోగ్రాఫిక్స్",
+                learningResources: "📖 అభ్యాస వనరులు",
+                latestUpdates: "📰 తాజా నవీకరణలు",
+                settingsTitle: "సెట్టింగ్‌లు",
+                settingsDesc: "మీ డాష్‌బోర్డ్ ప్రాధాన్యతలను కాన్ఫిగర్ చేయండి",
+                searching: "నీటి వనరులను వెతకడం...",
+                noWaterBodies: "మీ ప్రాంతంలో నీటి వనరులు ఏవీ లేవు",
+                river: "నది",
+                lake: "సరస్సు",
+                pond: "చెరువు",
+                well: "బావి",
+                reservoir: "నీటి నిల్వ",
+                ph: "pH",
+                turbidity: "గందరగోళం",
+                quality: "నాణ్యత",
+                submitReport: "నివేదిక సమర్పించండి",
+                reportSubmitted: "నివేదిక విజయవంతంగా సమర్పించబడింది",
+                reportError: "నివేదిక సమర్పించడంలో లోపం",
+                noComplaints: "ఫిర్యాదులు ఏవీ లేవు",
+                statusPending: "పెండింగ్‌లో ఉంది",
+                statusInProgress: "పురోగతిలో ఉంది",
+                statusResolved: "పరిష్కరించబడింది",
+                markResolved: "పరిష్కరించబడినదిగా గుర్తించండి",
+                deleteReport: "తొలగించు"
+            },
+            ml: {
+                appName: "വേവ്‌ജെനിക്സ്",
+                welcome: "വേവ്‌ജെനിക്സിലേക്ക് സ്വാഗതം",
+                navDashboard: "📊 ഡാഷ്‌ബോർഡ്",
+                navMap: "🗺️ ഗ്രാമ മാപ്പ്",
+                navAnalytics: "📈 അനലിറ്റിക്സ്",
+                navAlerts: "🔔 അലേർട്ടുകൾ",
+                navGame: "🎮 pH പഠന ഗെയിം",
+                navVillageHeads: "👥 ഗ്രാമ പ്രമുഖർ",
+                navEducation: "📚 വിദ്യാഭ്യാസ ഹബ്",
+                navHealth: "🏥 ആരോഗ്യ വിഭവങ്ങൾ",
+                navReports: "📝 റിപ്പോർട്ടുകളും പരാതികളും",
+                navSettings: "⚙️ ക്രമീകരണങ്ങൾ",
+                phLevel: "pH ലെവൽ",
+                tdsLevel: "TDS ലെവൽ",
+                temperature: "താപനില",
+                waterQuality: "ജല ഗുണനിലവാരം",
+                good: "നല്ലത്",
+                getLocation: "📍 എന്റെ സ്ഥാനം നേടുക",
+                findWaterBodies: "💧 ജലസ്രോതസ്സുകൾ കണ്ടെത്തുക",
+                clearWaterBodies: "🗑️ ജലസ്രോതസ്സുകൾ മായ്‌ക്കുക",
+                nearbyWaterBodies: "സമീപത്തുള്ള ജലസ്രോതസ്സുകൾ",
+                weeklyTrend: "വാരാന്ത്യ ജല ഗുണനിലവാര പ്രവണത",
+                villageComparison: "ഗ്രാമ സാമ്യം",
+                criticalAlert: "🚨 നിർണായകമായ അലേർട്ട്",
+                warningAlert: "⚠️ മുന്നറിയിപ്പ്",
+                infoAlert: "ℹ️ വിവരം",
+                alertMsg1: "ഗ്രാമം A-യിൽ ഉയർന്ന TDS കണ്ടെത്തി - ഉടനടി നടപടി ആവശ്യമാണ്",
+                alertMsg2: "ഗ്രാമം B-യിൽ pH ലെവലുകൾ അസുരക്ഷിതമായ പരിധിയിലെത്തുന്നു",
+                alertMsg3: "നാളെ ഗ്രാമം C-യിൽ സെൻസറുകൾക്കായി ഷെഡ്യൂൾ ചെയ്ത പരിപാലനം",
+                nextQuestion: "അടുത്ത ചോദ്യം",
+                restartQuiz: "ക്വിസ് വീണ്ടും ആരംഭിക്കുക",
+                awarenessVideos: "🎥 അവബോധ വീഡിയോകൾ",
+                infographics: "📊 ഇൻഫോഗ്രാഫിക്സ്",
+                learningResources: "📖 പഠന വിഭവങ്ങൾ",
+                latestUpdates: "📰 ഏറ്റവും പുതിയ അപ്‌ഡേറ്റുകൾ",
+                settingsTitle: "ക്രമീകരണങ്ങൾ",
+                settingsDesc: "നിങ്ങളുടെ ഡാഷ്‌ബോർഡ് മുൻഗണനകൾ കോൺഫിഗർ ചെയ്യുക",
+                searching: "ജലസ്രോതസ്സുകൾ തിരയുന്നു...",
+                noWaterBodies: "നിങ്ങളുടെ പ്രദേശത്ത് ജലസ്രോതസ്സുകൾ ഒന്നും കണ്ടെത്തിയില്ല",
+                river: "നദി",
+                lake: "തടാകം",
+                pond: "കുളം",
+                well: "കിണർ",
+                reservoir: "ജലസംഭരണി",
+                ph: "pH",
+                turbidity: "അഴുക്ക്",
+                quality: "ഗുണനിലവാരം",
+                submitReport: "റിപ്പോർട്ട് സമർപ്പിക്കുക",
+                reportSubmitted: "റിപ്പോർട്ട് വിജയകരമായി സമർപ്പിച്ചു",
+                reportError: "റിപ്പോർട്ട് സമർപ്പിക്കുന്നതിൽ പിശക്",
+                noComplaints: "പരാതികളൊന്നും കണ്ടെത്തിയില്ല",
+                statusPending: "തീർച്ചപ്പെടുത്താത്ത",
+                statusInProgress: "പുരോഗതിയിൽ",
+                statusResolved: "പരിഹരിച്ചു",
+                markResolved: "പരിഹരിച്ചതായി അടയാളപ്പെടുത്തുക",
+                deleteReport: "ഇല്ലാതാക്കുക"
+            }
+        };
+
+        let currentLanguage = 'en';
+        let currentTheme = 'light';
+        let map;
+        let userMarker;
+        let waterBodyMarkers = [];
+        let mapInitialized = false;
+
+        // Quiz data with explanations
+        const quizData = [
+            {
+                question: "What is the ideal pH range for drinking water?",
+                options: ["5.5-6.5", "6.5-8.5", "8.5-9.5", "9.5-10.5"],
+                correct: 1,
+                explanation: "The ideal pH range for drinking water is 6.5-8.5. This range is considered safe and palatable for human consumption according to WHO guidelines."
+            },
+            {
+                question: "What does TDS stand for?",
+                options: ["Total Dissolved Solids", "Total Drinking Standards", "Temperature Distribution System", "Treated Drinking Supply"],
+                correct: 0,
+                explanation: "TDS stands for Total Dissolved Solids. It measures the combined content of all inorganic and organic substances in water."
+            },
+            {
+                question: "What is the maximum acceptable TDS level for drinking water (in ppm)?",
+                options: ["100", "300", "500", "1000"],
+                correct: 2,
+                explanation: "The maximum acceptable TDS level for drinking water is 500 ppm according to WHO standards. Water with TDS above this may have an unpleasant taste."
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answeredQuestions = 0;
+
+        // Reports & Complaints Data
+        let complaints = JSON.parse(localStorage.getItem('waterComplaints')) || [
+            {
+                id: 1,
+                type: "water_quality",
+                location: "Narela Village",
+                description: "Water has unusual odor and color. Suspected contamination from nearby industrial area.",
+                priority: "high",
+                status: "in-progress",
+                date: "2023-10-15",
+                contact: "9876543210"
+            },
+            {
+                id: 2,
+                type: "infrastructure",
+                location: "Bawana Sector 5",
+                description: "Water pipeline leakage near community center. Wasting significant amount of water daily.",
+                priority: "medium",
+                status: "pending",
+                date: "2023-10-14",
+                contact: ""
+            },
+            {
+                id: 3,
+                type: "supply",
+                location: "Kanjhawala",
+                description: "Irregular water supply for past 3 days. Residents facing difficulties.",
+                priority: "critical",
+                status: "resolved",
+                date: "2023-10-10",
+                contact: "rajesh@email.com"
+            }
+        ];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Don't initialize map here, wait for section to be shown
+            initCharts();
+            initQuiz();
+            initEducationHub();
+            initHealthResources();
+            initVillageHeads();
+            initReports();
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme) {
+                currentTheme = savedTheme;
+                document.documentElement.setAttribute('data-theme', currentTheme);
+                document.getElementById('themeIcon').textContent = currentTheme === 'light' ? '🌙' : '☀️';
+            }
+            
+            // Load saved language
+            const savedLang = localStorage.getItem('language');
+            if (savedLang) {
+                currentLanguage = savedLang;
+                document.querySelector('.language-selector').value = currentLanguage;
+                changeLanguage(currentLanguage);
+            }
+        });
+
+        // Theme Toggle
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            document.getElementById('themeIcon').textContent = currentTheme === 'light' ? '🌙' : '☀️';
+            localStorage.setItem('theme', currentTheme);
+            
+            // Update charts
+            if (window.dashboardChart) {
+                updateChartTheme(window.dashboardChart);
+            }
+            if (window.analyticsChart) {
+                updateChartTheme(window.analyticsChart);
+            }
+            if (window.comparisonChart) {
+                updateChartTheme(window.comparisonChart);
+            }
+        }
+
+        function updateChartTheme(chart) {
+            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
+            const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+            
+            if (chart.options.scales) {
+                if (chart.options.scales.x) {
+                    chart.options.scales.x.ticks.color = textColor;
+                    chart.options.scales.x.grid.color = gridColor;
+                }
+                if (chart.options.scales.y) {
+                    chart.options.scales.y.ticks.color = textColor;
+                    chart.options.scales.y.grid.color = gridColor;
+                }
+                if (chart.options.scales.r) {
+                    chart.options.scales.r.ticks.color = textColor;
+                    chart.options.scales.r.grid.color = gridColor;
+                    chart.options.scales.r.pointLabels.color = textColor;
+                }
+            }
+            
+            if (chart.options.plugins && chart.options.plugins.legend) {
+                chart.options.plugins.legend.labels.color = textColor;
+            }
+            
+            chart.update();
+        }
+
+        // Language Change
+        function changeLanguage(lang) {
+            currentLanguage = lang;
+            localStorage.setItem('language', lang);
+            const elements = document.querySelectorAll('[data-translate]');
+            elements.forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (translations[lang] && translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+        }
+
+        // Section Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            // Initialize map when map section is shown
+            if (sectionId === 'mapSection' && !mapInitialized) {
+                initMap();
+                mapInitialized = true;
+            }
+            
+            // Refresh complaints when reports section is shown
+            if (sectionId === 'reports') {
+                refreshComplaints();
+            }
+        }
+
+        // Map Initialization
+        function initMap() {
+            // Check if map container exists
+            const mapContainer = document.getElementById('mapContainer');
+            if (!mapContainer) {
+                console.error('Map container not found');
+                return;
+            }
+
+            // Initialize the map
+            map = L.map('mapContainer').setView([28.6139, 77.2090], 10);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Village data with real coordinates around Delhi
+            const villages = [
+                {name: "Narela", lat: 28.8534, lng: 77.0931, ph: 7.2, tds: 320, status: "Good"},
+                {name: "Bawana", lat: 28.7951, lng: 77.0297, ph: 6.8, tds: 450, status: "Moderate"},
+                {name: "Alipur", lat: 28.7981, lng: 77.1331, ph: 7.5, tds: 280, status: "Good"},
+                {name: "Kanjhawala", lat: 28.7644, lng: 77.0764, ph: 6.5, tds: 520, status: "Poor"},
+                {name: "Najafgarh", lat: 28.6092, lng: 76.9798, ph: 7.1, tds: 380, status: "Good"},
+                {name: "Dwarka", lat: 28.5921, lng: 77.0460, ph: 7.3, tds: 310, status: "Good"},
+                {name: "Mehrauli", lat: 28.5244, lng: 77.1855, ph: 6.9, tds: 420, status: "Moderate"},
+                {name: "Chhattarpur", lat: 28.5064, lng: 77.1750, ph: 7.0, tds: 390, status: "Good"},
+                {name: "Sultanpur", lat: 28.4994, lng: 77.0631, ph: 6.7, tds: 480, status: "Moderate"},
+                {name: "Ghitorni", lat: 28.4931, lng: 77.1189, ph: 7.2, tds: 340, status: "Good"},
+                {name: "Kapashera", lat: 28.5311, lng: 77.0689, ph: 6.6, tds: 510, status: "Poor"},
+                {name: "Bijwasan", lat: 28.5711, lng: 77.0589, ph: 7.4, tds: 295, status: "Good"}
+            ];
+
+            villages.forEach(village => {
+                const color = village.status === 'Good' ? 'green' : village.status === 'Moderate' ? 'orange' : 'red';
+                const marker = L.circleMarker([village.lat, village.lng], {
+                    radius: 8,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+
+                marker.bindPopup(`
+                    <b>${village.name}</b><br>
+                    pH: ${village.ph}<br>
+                    TDS: ${village.tds} ppm<br>
+                    Status: ${village.status}
+                `);
+            });
+
+            console.log('Map initialized successfully');
+        }
+
+        function getMyLocation() {
+            if (!map) {
+                alert('Map is not initialized. Please wait or refresh the page.');
+                return;
+            }
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    
+                    if (userMarker) {
+                        map.removeLayer(userMarker);
+                    }
+                    
+                    userMarker = L.marker([lat, lng]).addTo(map);
+                    userMarker.bindPopup('<b>Your Location</b>').openPopup();
+                    map.setView([lat, lng], 13);
+                }, error => {
+                    alert('Unable to get your location. Please enable location services.');
+                });
+            } else {
+                alert('Geolocation is not supported by your browser.');
+            }
+        }
+
+        function findWaterBodies() {
+            if (!map || !userMarker) {
+                alert('Please get your location first.');
+                return;
+            }
+
+            const userLatLng = userMarker.getLatLng();
+            
+            // Show loading
+            const waterBodyGrid = document.getElementById('waterBodyGrid');
+            waterBodyGrid.innerHTML = `<div class="loading">${translations[currentLanguage].searching || 'Searching for water bodies...'}</div>`;
+            document.getElementById('waterBodyInfo').style.display = 'block';
+
+            // Clear existing water body markers
+            clearWaterBodies();
+
+            // Simulate API call with timeout
+            setTimeout(() => {
+                // Generate mock water bodies near user location
+                const waterBodies = generateMockWaterBodies(userLatLng.lat, userLatLng.lng);
+                
+                // Display water bodies on map and in info panel
+                displayWaterBodies(waterBodies, waterBodyGrid);
+            }, 1500);
+        }
+
+        function generateMockWaterBodies(userLat, userLng) {
+            const waterBodyTypes = ['river', 'lake', 'pond', 'well', 'reservoir'];
+            const waterBodies = [];
+            
+            // Generate 3-6 random water bodies near user location
+            const count = Math.floor(Math.random() * 4) + 3;
+            
+            for (let i = 0; i < count; i++) {
+                // Generate random coordinates within 5km of user
+                const lat = userLat + (Math.random() - 0.5) * 0.05;
+                const lng = userLng + (Math.random() - 0.5) * 0.05;
+                
+                const type = waterBodyTypes[Math.floor(Math.random() * waterBodyTypes.length)];
+                const ph = (Math.random() * 2 + 6.5).toFixed(1); // pH between 6.5-8.5
+                const turbidity = (Math.random() * 10).toFixed(1); // Turbidity between 0-10 NTU
+                
+                // Determine quality based on pH and turbidity
+                let quality = 'Good';
+                if (ph < 6.5 || ph > 8.5 || turbidity > 5) {
+                    quality = 'Moderate';
+                }
+                if (ph < 6.0 || ph > 9.0 || turbidity > 8) {
+                    quality = 'Poor';
+                }
+                
+                waterBodies.push({
+                    id: i,
+                    name: `${translations[currentLanguage][type] || type} ${i+1}`,
+                    type: type,
+                    lat: lat,
+                    lng: lng,
+                    ph: ph,
+                    turbidity: turbidity,
+                    quality: quality
+                });
+            }
+            
+            return waterBodies;
+        }
+
+        function displayWaterBodies(waterBodies, waterBodyGrid) {
+            waterBodyGrid.innerHTML = '';
+            
+            if (waterBodies.length === 0) {
+                waterBodyGrid.innerHTML = `<div class="loading">${translations[currentLanguage].noWaterBodies || 'No water bodies found in your area'}</div>`;
+                return;
+            }
+            
+            waterBodies.forEach(waterBody => {
+                // Add marker to map
+                const color = waterBody.quality === 'Good' ? 'green' : waterBody.quality === 'Moderate' ? 'orange' : 'red';
+                const marker = L.circleMarker([waterBody.lat, waterBody.lng], {
+                    radius: 10,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(map);
+                
+                marker.bindPopup(`
+                    <b>${waterBody.name}</b><br>
+                    ${translations[currentLanguage].ph || 'pH'}: ${waterBody.ph}<br>
+                    ${translations[currentLanguage].turbidity || 'Turbidity'}: ${waterBody.turbidity} NTU<br>
+                    ${translations[currentLanguage].quality || 'Quality'}: ${waterBody.quality}
+                `);
+                
+                waterBodyMarkers.push(marker);
+                
+                // Add to info panel
+                const card = document.createElement('div');
+                card.className = 'water-body-card';
+                card.innerHTML = `
+                    <h4>${waterBody.name}</h4>
+                    <p><strong>${translations[currentLanguage].ph || 'pH'}:</strong> ${waterBody.ph}</p>
+                    <p><strong>${translations[currentLanguage].turbidity || 'Turbidity'}:</strong> ${waterBody.turbidity} NTU</p>
+                    <p><strong>${translations[currentLanguage].quality || 'Quality'}:</strong> <span style="color: ${color}">${waterBody.quality}</span></p>
+                `;
+                waterBodyGrid.appendChild(card);
+            });
+        }
+
+        function clearWaterBodies() {
+            // Remove all water body markers from map
+            waterBodyMarkers.forEach(marker => {
+                map.removeLayer(marker);
+            });
+            waterBodyMarkers = [];
+            
+            // Hide water body info panel
+            document.getElementById('waterBodyInfo').style.display = 'none';
+        }
+
+        // Charts Initialization
+        function initCharts() {
+            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
+            const gridColor = getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim();
+
+            // Dashboard Chart
+            const dashboardCtx = document.getElementById('dashboardChart').getContext('2d');
+            window.dashboardChart = new Chart(dashboardCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'pH Level',
+                        data: [7.1, 7.2, 7.0, 7.3, 7.2, 7.1, 7.2],
+                        borderColor: '#3b82f6',
+                        tension: 0.4
+                    }, {
+                        label: 'TDS (ppm)',
+                        data: [310, 320, 305, 330, 320, 315, 320],
+                        borderColor: '#10b981',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: textColor }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        }
+                    }
+                }
+            });
+
+            // Analytics Chart
+            const analyticsCtx = document.getElementById('analyticsChart').getContext('2d');
+            window.analyticsChart = new Chart(analyticsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Average pH',
+                        data: [7.1, 7.2, 7.0, 7.2],
+                        backgroundColor: '#3b82f6'
+                    }, {
+                        label: 'Average TDS',
+                        data: [315, 320, 310, 318],
+                        backgroundColor: '#10b981'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: textColor }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        },
+                        y: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor }
+                        }
+                    }
+                }
+            });
+
+            // Comparison Chart
+            const comparisonCtx = document.getElementById('comparisonChart').getContext('2d');
+            window.comparisonChart = new Chart(comparisonCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['pH', 'TDS', 'Temperature', 'Turbidity', 'Chlorine'],
+                    datasets: [{
+                        label: 'Village A',
+                        data: [7.2, 320, 24, 0.8, 0.3],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)'
+                    }, {
+                        label: 'Village B',
+                        data: [6.8, 450, 26, 1.2, 0.4],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            labels: { color: textColor }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            ticks: { color: textColor },
+                            grid: { color: gridColor },
+                            pointLabels: { color: textColor }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Quiz Functions
+        function initQuiz() {
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            if (currentQuestion >= quizData.length) {
+                showResults();
+                return;
+            }
+
+            const question = quizData[currentQuestion];
+            document.getElementById('quizQuestion').textContent = `Question ${currentQuestion + 1}: ${question.question}`;
+            document.getElementById('quizScore').textContent = `Score: ${score} / ${answeredQuestions}`;
+            document.getElementById('progressFill').style.width = `${(currentQuestion / quizData.length) * 100}%`;
+            
+            const optionsContainer = document.getElementById('quizOptions');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'quiz-option';
+                optionDiv.textContent = option;
+                optionDiv.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            document.getElementById('quizExplanation').classList.remove('show');
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function selectAnswer(selectedIndex) {
+            const question = quizData[currentQuestion];
+            const options = document.querySelectorAll('.quiz-option');
+            
+            options.forEach((option, index) => {
+                option.onclick = null;
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                }
+                if (index === selectedIndex && index !== question.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+
+            answeredQuestions++;
+            if (selectedIndex === question.correct) {
+                score++;
+            } else {
+                // Show explanation for wrong answer
+                const explanationDiv = document.getElementById('quizExplanation');
+                explanationDiv.innerHTML = `<strong>Explanation:</strong> ${question.explanation}`;
+                explanationDiv.classList.add('show');
+            }
+
+            document.getElementById('quizScore').textContent = `Score: ${score} / ${answeredQuestions}`;
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            loadQuestion();
+        }
+
+        function showResults() {
+            const percentage = (score / quizData.length) * 100;
+            let message = '';
+            
+            if (percentage >= 80) {
+                message = 'Excellent! You have great knowledge about water quality!';
+            } else if (percentage >= 60) {
+                message = 'Good job! Keep learning about water quality.';
+            } else {
+                message = 'Keep practicing! Review the materials to improve your knowledge.';
+            }
+
+            document.getElementById('quizQuestion').textContent = `Quiz Complete!`;
+            document.getElementById('quizOptions').innerHTML = `
+                <div style="text-align: center; padding: 40px;">
+                    <h2>Your Score: ${score} / ${quizData.length}</h2>
+                    <h3>${percentage.toFixed(1)}%</h3>
+                    <p style="margin-top: 20px; font-size: 18px;">${message}</p>
+                </div>
+            `;
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('restartBtn').style.display = 'block';
+            document.getElementById('progressFill').style.width = '100%';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answeredQuestions = 0;
+            document.getElementById('restartBtn').style.display = 'none';
+            loadQuestion();
+        }
+
+        // Education Hub
+        function showEducationTab(tabName) {
+            document.querySelectorAll('.education-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.education-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            event.currentTarget.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        function initEducationHub() {
+            // Videos
+            const videos = [
+                {
+                    title: "Understanding Water pH",
+                    description: "Learn about pH levels and their importance in water quality",
+                    thumbnail: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=400",
+                    videoId: "dQw4w9WgXcQ"
+                },
+                {
+                    title: "Water Purification Methods",
+                    description: "Explore different methods to purify water at home",
+                    thumbnail: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400",
+                    videoId: "dQw4w9WgXcQ"
+                },
+                {
+                    title: "Waterborne Diseases Prevention",
+                    description: "How to prevent common waterborne diseases",
+                    thumbnail: "https://images.unsplash.com/photo-1584515933487-779824d29309?w=400",
+                    videoId: "dQw4w9WgXcQ"
+                },
+                {
+                    title: "TDS and Water Quality",
+                    description: "Understanding Total Dissolved Solids in water",
+                    thumbnail: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400",
+                    videoId: "dQw4w9WgXcQ"
+                },
+                {
+                    title: "Safe Water Storage",
+                    description: "Best practices for storing drinking water safely",
+                    thumbnail: "https://images.unsplash.com/photo-1550537687-c91072c4792d?w=400",
+                    videoId: "dQw4w9WgXcQ"
+                },
+                {
+                    title: "Water Testing at Home",
+                    description: "Simple methods to test water quality at home",
+                    thumbnail: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400",
+                    videoId: "dQw4w9WgXcQ"
+                }
+            ];
+
+           const videosContainer = document.getElementById('videos');
+            videos.forEach(video => {
+                const card = document.createElement('div');
+                card.className = 'resource-card';
+                card.onclick = () => openVideo(video.title, video.videoId);
+                card.innerHTML = `
+                    <img src="${video.thumbnail}" alt="${video.title}" class="resource-image">
+                    <div class="resource-content">
+                        <div class="resource-title">${video.title}</div>
+                        <div class="resource-description">${video.description}</div>
+                    </div>
+                `;
+                videosContainer.appendChild(card);
+            });
+
+            // Infographics with Charts
+            const infographicsContainer = document.getElementById('infographics');
+            infographicsContainer.innerHTML = `
+                <div class="chart-container">
+                    <h3>Water Quality Standards</h3>
+                    <canvas id="infographicChart1"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Waterborne Disease Prevalence</h3>
+                    <canvas id="infographicChart2"></canvas>
+                </div>
+                <div class="chart-container">
+                    <h3>Village Water Quality Comparison</h3>
+                    <canvas id="infographicChart3"></canvas>
+                </div>
+            `;
+
+            // Initialize infographic charts
+            setTimeout(() => {
+                const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text-primary').trim();
+                
+                // Chart 1: Water Quality Standards
+                const ctx1 = document.getElementById('infographicChart1').getContext('2d');
+                new Chart(ctx1, {
+                    type: 'bar',
+                    data: {
+                        labels: ['pH Min', 'pH Max', 'TDS Max', 'Turbidity Max', 'Chlorine Min'],
+                        datasets: [{
+                            label: 'WHO Standards',
+                            data: [6.5, 8.5, 500, 1, 0.2],
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            x: { ticks: { color: textColor } },
+                            y: { ticks: { color: textColor } }
+                        }
+                    }
+                });
+
+                // Chart 2: Disease Prevalence
+                const ctx2 = document.getElementById('infographicChart2').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Cholera', 'Typhoid', 'Dysentery', 'Hepatitis A', 'Giardiasis'],
+                        datasets: [{
+                            data: [25, 20, 18, 22, 15],
+                            backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: textColor } }
+                        }
+                    }
+                });
+
+                // Chart 3: Village Comparison
+                const ctx3 = document.getElementById('infographicChart3').getContext('2d');
+                new Chart(ctx3, {
+                    type: 'radar',
+                    data: {
+                        labels: ['pH', 'TDS', 'Temperature', 'Turbidity', 'Chlorine'],
+                        datasets: [{
+                            label: 'Village A',
+                            data: [7.2, 320, 24, 0.8, 0.3],
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)'
+                        }, {
+                            label: 'Village B',
+                            data: [6.8, 450, 26, 1.2, 0.4],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.2)'
+                        }, {
+                            label: 'Village C',
+                            data: [7.5, 280, 23, 0.6, 0.25],
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.2)'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { labels: { color: textColor } }
+                        },
+                        scales: {
+                            r: {
+                                ticks: { color: textColor },
+                                pointLabels: { color: textColor }
+                            }
+                        }
+                    }
+                });
+            }, 100);
+
+            // Learning Resources with Images
+            const resources = [
+                {
+                    title: "WHO Water Quality Guidelines",
+                    description: "Comprehensive guidelines for safe drinking water",
+                    image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=400",
+                    link: "https://www.who.int/water_sanitation_health/publications/drinking-water-quality-guidelines"
+                },
+                {
+                    title: "EPA Water Resources",
+                    description: "Educational materials on water quality and safety",
+                    image: "https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=400",
+                    link: "https://www.epa.gov/learn-issues/learn-about-water"
+                },
+                {
+                    title: "UNICEF Water & Sanitation",
+                    description: "Global water and sanitation programs",
+                    image: "https://images.unsplash.com/photo-1559827260-dc66d52bef19?w=400",
+                    link: "https://www.unicef.org/wash"
+                },
+                {
+                    title: "CDC Water Treatment",
+                    description: "Water treatment and purification methods",
+                    image: "https://images.unsplash.com/photo-1582268611958-ebfd161ef9cf?w=400",
+                    link: "https://www.cdc.gov/healthywater/drinking/home-water-treatment/index.html"
+                },
+                {
+                    title: "WaterAid Resources",
+                    description: "Clean water and sanitation education",
+                    image: "https://images.unsplash.com/photo-1584515933487-779824d29309?w=400",
+                    link: "https://www.wateraid.org/in/"
+                },
+                {
+                    title: "Jal Jeevan Mission",
+                    description: "India's water supply program resources",
+                    image: "https://images.unsplash.com/photo-1550537687-c91072c4792d?w=400",
+                    link: "https://jaljeevanmission.gov.in/"
+                }
+            ];
+
+            const resourcesContainer = document.getElementById('resources');
+            resources.forEach(resource => {
+                const card = document.createElement('div');
+                card.className = 'resource-card';
+                card.onclick = () => window.open(resource.link, '_blank');
+                card.innerHTML = `
+                    <img src="${resource.image}" alt="${resource.title}" class="resource-image">
+                    <div class="resource-content">
+                        <div class="resource-title">${resource.title}</div>
+                        <div class="resource-description">${resource.description}</div>
+                    </div>
+                `;
+                resourcesContainer.appendChild(card);
+            });
+
+            // Latest Updates
+            const updates = [
+                {
+                    title: "New Water Quality Sensors Installed",
+                    description: "Advanced IoT sensors deployed in 5 new villages",
+                    date: "2 days ago"
+                },
+                {
+                    title: "Water Quality Improvement in Village A",
+                    description: "pH levels normalized after treatment plant upgrade",
+                    date: "1 week ago"
+                },
+                {
+                    title: "Community Training Program",
+                    description: "Water quality awareness workshop conducted",
+                    date: "2 weeks ago"
+                },
+                {
+                    title: "Monsoon Water Safety Guidelines",
+                    description: "Special precautions for rainy season released",
+                    date: "3 weeks ago"
+                }
+            ];
+
+            const updatesContainer = document.getElementById('updates');
+            updates.forEach(update => {
+                const card = document.createElement('div');
+                card.className = 'resource-card';
+                card.innerHTML = `
+                    <div class="resource-content">
+                        <div class="resource-title">${update.title}</div>
+                        <div class="resource-description">${update.description}</div>
+                        <small style="color: var(--text-secondary);">${update.date}</small>
+                    </div>
+                `;
+                updatesContainer.appendChild(card);
+            });
+        }
+
+        function openVideo(title, videoId) {
+            document.getElementById('videoTitle').textContent = title;
+            document.getElementById('videoFrame').src = `https://www.youtube.com/embed/${videoId}`;
+            document.getElementById('videoModal').classList.add('active');
+        }
+
+        function closeVideoModal() {
+            document.getElementById('videoModal').classList.remove('active');
+            document.getElementById('videoFrame').src = '';
+        }
+
+        // Health Resources
+        function initHealthResources() {
+            const healthData = [
+                {
+                    icon: "💧",
+                    title: "Waterborne Diseases",
+                    description: "Understanding and preventing water-related illnesses",
+                    tips: [
+                        "Always drink boiled or purified water",
+                        "Wash hands before eating and after using toilet",
+                        "Store water in clean, covered containers",
+                        "Avoid drinking water from unknown sources"
+                    ]
+                },
+                {
+                    icon: "🏥",
+                    title: "Cholera Prevention",
+                    description: "Protect yourself and your family from cholera",
+                    tips: [
+                        "Drink only safe, treated water",
+                        "Cook food thoroughly and eat while hot",
+                        "Wash fruits and vegetables with clean water",
+                        "Practice good hygiene and sanitation"
+                    ]
+                },
+                {
+                    icon: "🦠",
+                    title: "Typhoid Awareness",
+                    description: "Symptoms, prevention, and treatment of typhoid",
+                    tips: [
+                        "Get vaccinated against typhoid",
+                        "Avoid street food and raw vegetables",
+                        "Drink only bottled or boiled water",
+                        "Maintain personal hygiene"
+                    ]
+                },
+                {
+                    icon: "🩺",
+                    title: "Diarrheal Diseases",
+                    description: "Managing and preventing diarrhea",
+                    tips: [
+                        "Stay hydrated with ORS solution",
+                        "Maintain hand hygiene",
+                        "Ensure safe water and food",
+                        "Seek medical help if symptoms persist"
+                    ]
+                },
+                {
+                    icon: "🧪",
+                    title: "Water Testing",
+                    description: "Regular water quality monitoring",
+                    tips: [
+                        "Test water pH and TDS regularly",
+                        "Check for visible contamination",
+                        "Use certified testing kits",
+                        "Report abnormal readings immediately"
+                    ]
+                },
+                {
+                    icon: "🛡️",
+                    title: "Preventive Measures",
+                    description: "Daily practices for safe water consumption",
+                    tips: [
+                        "Clean water storage tanks monthly",
+                        "Use water filters or purifiers",
+                        "Boil water for at least 1 minute",
+                        "Avoid mixing old and new water"
+                    ]
+                }
+            ];
+
+            const healthGrid = document.getElementById('healthGrid');
+            healthData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'health-card';
+                card.innerHTML = `
+                    <div class="health-icon">${item.icon}</div>
+                    <div class="health-title">${item.title}</div>
+                    <div class="health-description">${item.description}</div>
+                    <ul class="health-tips">
+                        ${item.tips.map(tip => `<li>${tip}</li>`).join('')}
+                    </ul>
+                `;
+                healthGrid.appendChild(card);
+            });
+        }
+
+        // Village Heads
+        function initVillageHeads() {
+            const villageHeads = [
+                {name: "Rajesh Kumar", village: "Narela", phone: "+91 98765 43210"},
+                {name: "Priya Sharma", village: "Bawana", phone: "+91 98765 43211"},
+                {name: "Amit Singh", village: "Alipur", phone: "+91 98765 43212"},
+                {name: "Sunita Devi", village: "Kanjhawala", phone: "+91 98765 43213"},
+                {name: "Ramesh Yadav", village: "Najafgarh", phone: "+91 98765 43214"},
+                {name: "Kavita Gupta", village: "Dwarka", phone: "+91 98765 43215"},
+                {name: "Vijay Verma", village: "Mehrauli", phone: "+91 98765 43216"},
+                {name: "Anita Patel", village: "Chhattarpur", phone: "+91 98765 43217"},
+                {name: "Suresh Reddy", village: "Sultanpur", phone: "+91 98765 43218"},
+                {name: "Meena Joshi", village: "Ghitorni", phone: "+91 98765 43219"},
+                {name: "Rakesh Mehta", village: "Kapashera", phone: "+91 98765 43220"},
+                {name: "Pooja Agarwal", village: "Bijwasan", phone: "+91 98765 43221"}
+            ];
+
+            const grid = document.getElementById('villageHeadsGrid');
+            villageHeads.forEach(head => {
+                const card = document.createElement('div');
+                card.className = 'village-head-card';
+                card.innerHTML = `
+                    <div class="village-head-avatar">👤</div>
+                    <h3>${head.name}</h3>
+                    <p style="color: var(--text-secondary);">${head.village}</p>
+                    <p style="color: var(--accent-primary); margin-top: 10px;">📞 ${head.phone}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Reports & Complaints Functions
+        function initReports() {
+            // Load complaints from localStorage
+            const savedComplaints = localStorage.getItem('waterComplaints');
+            if (savedComplaints) {
+                complaints = JSON.parse(savedComplaints);
+            }
+            
+            // Set up form submission
+            document.getElementById('reportForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitReport();
+            });
+            
+            // Initial load of complaints
+            refreshComplaints();
+        }
+
+        function submitReport() {
+            const issueType = document.getElementById('issueType').value;
+            const location = document.getElementById('location').value;
+            const description = document.getElementById('description').value;
+            const priority = document.getElementById('priority').value;
+            const contact = document.getElementById('contact').value;
+            
+            // Create new complaint
+            const newComplaint = {
+                id: Date.now(), // Use timestamp as unique ID
+                type: issueType,
+                location: location,
+                description: description,
+                priority: priority,
+                status: "pending",
+                date: new Date().toISOString().split('T')[0],
+                contact: contact
+            };
+            
+            // Add to complaints array
+            complaints.unshift(newComplaint);
+            
+            // Save to localStorage
+            localStorage.setItem('waterComplaints', JSON.stringify(complaints));
+            
+            // Show success message
+            alert(translations[currentLanguage].reportSubmitted || 'Report submitted successfully!');
+            
+            // Reset form
+            document.getElementById('reportForm').reset();
+            
+            // Refresh complaints list
+            refreshComplaints();
+        }
+
+        function refreshComplaints() {
+            const complaintsList = document.getElementById('complaintsList');
+            
+            if (complaints.length === 0) {
+                complaintsList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📝</div>
+                        <h3>${translations[currentLanguage].noComplaints || 'No complaints found'}</h3>
+                        <p>Submit a report using the form on the left to get started.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            complaintsList.innerHTML = '';
+            
+            complaints.forEach(complaint => {
+                const complaintCard = document.createElement('div');
+                complaintCard.className = `complaint-card ${complaint.status === 'resolved' ? 'resolved' : ''} ${complaint.priority === 'critical' ? 'critical' : ''}`;
+                
+                // Get status text based on current language
+                let statusText = '';
+                if (complaint.status === 'pending') {
+                    statusText = translations[currentLanguage].statusPending || 'Pending';
+                } else if (complaint.status === 'in-progress') {
+                    statusText = translations[currentLanguage].statusInProgress || 'In Progress';
+                } else {
+                    statusText = translations[currentLanguage].statusResolved || 'Resolved';
+                }
+                
+                // Get type display text
+                const typeText = getTypeDisplayText(complaint.type);
+                
+                complaintCard.innerHTML = `
+                    <div class="complaint-header">
+                        <div>
+                            <div class="complaint-title">${typeText} - ${complaint.location}</div>
+                            <div class="complaint-meta">
+                                <span>${complaint.date}</span>
+                                <span>Priority: ${complaint.priority}</span>
+                            </div>
+                        </div>
+                        <span class="complaint-status status-${complaint.status}">${statusText}</span>
+                    </div>
+                    <div class="complaint-description">${complaint.description}</div>
+                    ${complaint.contact ? `<div class="complaint-meta">Contact: ${complaint.contact}</div>` : ''}
+                    <div class="complaint-actions">
+                        ${complaint.status !== 'resolved' ? 
+                            `<button class="action-btn resolve-btn" onclick="resolveComplaint(${complaint.id})">
+                                ${translations[currentLanguage].markResolved || 'Mark Resolved'}
+                            </button>` : ''
+                        }
+                        <button class="action-btn delete-btn" onclick="deleteComplaint(${complaint.id})">
+                            ${translations[currentLanguage].deleteReport || 'Delete'}
+                        </button>
+                    </div>
+                `;
+                
+                complaintsList.appendChild(complaintCard);
+            });
+        }
+
+        function getTypeDisplayText(type) {
+            const typeMap = {
+                'water_quality': 'Water Quality Issue',
+                'contamination': 'Water Contamination',
+                'infrastructure': 'Infrastructure Problem',
+                'supply': 'Water Supply Issue',
+                'other': 'Other Issue'
+            };
+            return typeMap[type] || 'Unknown Issue';
+        }
+
+        function resolveComplaint(id) {
+            const complaintIndex = complaints.findIndex(c => c.id === id);
+            if (complaintIndex !== -1) {
+                complaints[complaintIndex].status = 'resolved';
+                localStorage.setItem('waterComplaints', JSON.stringify(complaints));
+                refreshComplaints();
+            }
+        }
+
+        function deleteComplaint(id) {
+            if (confirm('Are you sure you want to delete this report?')) {
+                complaints = complaints.filter(c => c.id !== id);
+                localStorage.setItem('waterComplaints', JSON.stringify(complaints));
+                refreshComplaints();
+            }
+        }
+    </script>
+</body>
+</html>
