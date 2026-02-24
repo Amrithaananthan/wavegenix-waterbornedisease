@@ -35,5 +35,8 @@ A comprehensive IoT and AI-powered solution for monitoring water-borne diseases 
 3. Run `python sensor_simulator.py`
 
 ## Team Members
-- Amritha M (Team Lead)
-- [Other team members]
+- Amritha A
+- Akshaya C
+- Anjan Sree S
+- Dhachayini P
+- Nandhini Devi K
