@@ -38,5 +38,3 @@ A comprehensive IoT and AI-powered solution for monitoring water-borne diseases 
 - Amritha A
 - Akshaya C
 - Anjan Sree S
-- Dhachayini P
-- Nandhini Devi K
